@@ -195,6 +195,7 @@ const config = {
   // watchman: true,
 };
 
+/** @type {import('jest').Config} */
 module.exports = {
   modulePaths: ['/shared/vendor/modules'],
   moduleFileExtensions: ['js', 'jsx'],
@@ -203,8 +204,11 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|less)$': '<rootDir>/__mocks__/styleMock.js',
     '\\.(gif|ttf|eot|svg)$': '<rootDir>/__mocks__/fileMock.js',
-
-    '^react(.*)$': '<rootDir>/vendor/react-master$1',
-    '^config$': '<rootDir>/configs/app-config.js',
   },
+
+  transform: {
+    '^.+\\.js$': 'babel-jest',
+  },
+
+  // Other Jest configuration options go here...
 };
