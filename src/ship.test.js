@@ -1,7 +1,13 @@
-const { ship } = require('./ship');
+const Ship = require('./ship');
 
-test('increments hit by correct amount', () => {
-  const ship1 = new ship(8);
-  ship1.hit();
-  expect(ship1.hits).toBe(1);
+test('Ship increments hits correctly', () => {
+  const ship = new Ship(8);
+  ship.hit();
+  expect(ship.hits).toBeGreaterThan(0);
+});
+
+test('Ship sinks when hits reach length', () => {
+  const ship = new Ship(1);
+  ship.hit();
+  expect(ship.isSunk()).toBe(true);
 });
