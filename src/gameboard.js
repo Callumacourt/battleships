@@ -15,9 +15,9 @@ export class gameboard {
 
       for (let j = 0; j < this.columns; j++) {
         const coordinate = `${letters[i]}${j + 1}`;
-        const values = [i, j + 1, 0];
+        const values = [i, j, 0];
 
-        this.board[i][j] = [coordinate, (this.occupied = false)];
+        this.board[i][j] = [coordinate, false]; // Initialize with coordinate and occupied = false
         this.coordinateMap[coordinate] = values;
       }
     }
@@ -38,6 +38,13 @@ export class gameboard {
     if (!validOrientations.includes(orientation.toUpperCase())) {
       throw new Error('Invalid orientation');
     }
-    console.log(this.coordinateMap);
+
+    const [row, col] = this.coordinateMap[coordinates];
+    const [coordinateValue, occupied] = this.board[row][col];
+
+    // Set occupied to true for the given coordinate
+    this.board[row][col] = [coordinateValue, true];
+
+    return this.board[row][col];
   }
 }
