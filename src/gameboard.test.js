@@ -45,16 +45,16 @@ describe('Gameboard', () => {
   });
 
   test('Correctly places ship', () => {
-    gameBoard.placeShip('a4', 1, 'y');
+    gameBoard.placeShip('a4', 4, 'x');
     const expectedBoard = [
       [
         ['a1', false],
         ['a2', false],
         ['a3', false],
         ['a4', true],
-        ['a5', false],
-        ['a6', false],
-        ['a7', false],
+        ['a5', true],
+        ['a6', true],
+        ['a7', true],
         ['a8', false],
         ['a9', false],
         ['a10', false],

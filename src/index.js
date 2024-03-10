@@ -1,5 +1,5 @@
 import { gameboard } from './gameboard';
 
 const gameBoard = new gameboard();
-
-gameBoard.placeShip('a4', 1, 'y');
+console.log(gameBoard.board);
+gameBoard.placeShip('a4', 4, 'x');

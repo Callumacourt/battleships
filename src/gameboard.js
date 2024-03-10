@@ -23,6 +23,11 @@ export class gameboard {
     }
   }
 
+  occupyCell(coordinate) {
+    const [row, col] = this.coordinateMap[coordinate];
+    this.board[row][col][1] = true;
+  }
+
   placeShip(coordinates, shipSize, orientation) {
     // Validation
     if (!/^([a-j])(10|[1-9])$/.test(coordinates)) {
@@ -39,12 +44,19 @@ export class gameboard {
       throw new Error('Invalid orientation');
     }
 
-    const [row, col] = this.coordinateMap[coordinates];
-    const [coordinateValue, occupied] = this.board[row][col];
+    if (orientation === 'y') {
+    }
 
-    // Set occupied to true for the given coordinate
-    this.board[row][col] = [coordinateValue, true];
+    if (orientation === 'x') {
+      let [startRow, startCol] = this.coordinateMap[coordinates];
 
-    return this.board[row][col];
+      for (let i = 0; i < shipSize; i += 1) {
+        let currentCoordinate = this.coordinateMap[coordinates];
+        this.occupyCell(coordinates);
+        currentCoordinate[1]++;
+      }
+    }
+
+    // according to the ship length and orientation
   }
 }
