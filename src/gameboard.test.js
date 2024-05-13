@@ -298,4 +298,16 @@ describe('Gameboard', () => {
     ]
     expect(gameBoard.board).toEqual(expectedBoard); 
   })
+
+  test('rejects ships out of boundaries for Y coords', () =>{
+expect(() => gameBoard.placeShip('i3', 4, 'y')).toThrowError(
+'Out of boundaries'
+)
+
+  })
+  test('rejects ships out of boundaries for X coords', () =>{
+  expect(() => gameBoard.placeShip('i8', 4, 'x')).toThrowError(
+    'Out of boundaries'
+    )
+      })
 });

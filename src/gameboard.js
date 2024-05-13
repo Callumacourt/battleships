@@ -1,3 +1,5 @@
+import { validateShipPlacement } from "./validate";
+
 export class gameboard {
   constructor() {
     this.rows = 10;
@@ -29,30 +31,21 @@ export class gameboard {
   }
 
   placeShip(coordinates, shipSize, orientation) {
-    // Validation
-    if (!/^([a-j])(10|[1-9])$/.test(coordinates)) {
-      throw new Error('Invalid coordinates');
-    }
 
-    const validSizes = [1, 2, 3, 4, 5];
-    if (!validSizes.includes(shipSize)) {
-      throw new Error('Invalid ship size');
-    }
+    validateShipPlacement(coordinates, shipSize, orientation);
 
-    const validOrientations = ['X', 'Y'];
-    if (!validOrientations.includes(orientation.toUpperCase())) {
-      throw new Error('Invalid orientation');
-    }
 
     if (orientation === 'y') {
-      let[startRow, startCol] = this.coordinateMap[coordinates]
-
-      for(let i = 0; i < shipSize; i+=1){
-      let currentCoordinate = this.coordinateMap[coordinates];
-      this.occupyCell(coordinates);
-      currentCoordinate[0]+=1
-      
+      let [startRow, startCol] = this.coordinateMap[coordinates];
+      for (let i = 0; i < shipSize; i += 1) {
+        let currentCoordinate = this.coordinateMap[coordinates];
+        if (startRow + i >= this.rows) {
+          throw new Error('Out of boundaries');
+        }
+        this.occupyCell(coordinates);
+        currentCoordinate[0] += 1;
       }
+    
     }
 
     if (orientation === 'x') {
@@ -60,11 +53,16 @@ export class gameboard {
 
       for (let i = 0; i < shipSize; i += 1) {
         let currentCoordinate = this.coordinateMap[coordinates];
+        if (startCol + i >= this.columns) {
+          throw new Error('Out of boundaries');
+        }
         this.occupyCell(coordinates);
-        currentCoordinate[1]++;
+        currentCoordinate[1]+=1
+        
+        }
       }
     }
 
     // according to the ship length and orientation
   }
-}
+
