@@ -45,6 +45,14 @@ export class gameboard {
     }
 
     if (orientation === 'y') {
+      let[startRow, startCol] = this.coordinateMap[coordinates]
+
+      for(let i = 0; i < shipSize; i+=1){
+      let currentCoordinate = this.coordinateMap[coordinates];
+      this.occupyCell(coordinates);
+      currentCoordinate[0]+=1
+      
+      }
     }
 
     if (orientation === 'x') {
