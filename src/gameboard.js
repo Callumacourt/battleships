@@ -1,4 +1,4 @@
-import { validateShipPlacement } from "./validate";
+import { validateShipPlacement, validateCell, validateYBoundary} from "./validate";
 
 export class gameboard {
   constructor() {
@@ -27,42 +27,40 @@ export class gameboard {
 
   occupyCell(coordinate) {
     const [row, col] = this.coordinateMap[coordinate];
-    this.board[row][col][1] = true;
+    const [_, isOccupied] = this.board[row][col];
+    return validateCell(this.board, row, col, isOccupied);
   }
 
   placeShip(coordinates, shipSize, orientation) {
-
     validateShipPlacement(coordinates, shipSize, orientation);
-
-
+  
     if (orientation === 'y') {
       let [startRow, startCol] = this.coordinateMap[coordinates];
+      const letters = 'abcdefghij';
+  
       for (let i = 0; i < shipSize; i += 1) {
-        let currentCoordinate = this.coordinateMap[coordinates];
-        if (startRow + i >= this.rows) {
-          throw new Error('Out of boundaries');
-        }
-        this.occupyCell(coordinates);
-        currentCoordinate[0] += 1;
+        const row = startRow + i;
+        validateYBoundary(this.rows, row)
+        const currentCoordinate = `${letters[row]}${startCol + 1}`;
+        this.occupyCell(currentCoordinate);
       }
-    
     }
-
+  
     if (orientation === 'x') {
       let [startRow, startCol] = this.coordinateMap[coordinates];
-
+      const letters = 'abcdefghij';
+  
       for (let i = 0; i < shipSize; i += 1) {
-        let currentCoordinate = this.coordinateMap[coordinates];
-        if (startCol + i >= this.columns) {
+        const col = startCol + i;
+        if (col >= this.columns) {
           throw new Error('Out of boundaries');
         }
-        this.occupyCell(coordinates);
-        currentCoordinate[1]+=1
-        
-        }
+        const currentCoordinate = `${letters[startRow]}${col + 1}`;
+        this.occupyCell(currentCoordinate);
       }
     }
+  }
 
-    // according to the ship length and orientation
+n
   }
 

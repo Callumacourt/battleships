@@ -2,6 +2,8 @@
 import { gameboard } from './gameboard';
 import Ship from './ship';
 
+
+let gameBoard
 describe('Gameboard', () => {
   let gameBoard;
 
@@ -301,13 +303,19 @@ describe('Gameboard', () => {
 
   test('rejects ships out of boundaries for Y coords', () =>{
 expect(() => gameBoard.placeShip('i3', 4, 'y')).toThrowError(
-'Out of boundaries'
-)
-
+'Out of boundaries')
   })
+
   test('rejects ships out of boundaries for X coords', () =>{
   expect(() => gameBoard.placeShip('i8', 4, 'x')).toThrowError(
     'Out of boundaries'
     )
+      })
+
+      test('rejects duplicate ship placement', () => {
+      gameBoard.placeShip('a1', 4, 'x')
+      expect(() => gameBoard.placeShip('a1', 4, 'x')).toThrowError(
+      'Existing ship within coordinates'
+      )
       })
 });

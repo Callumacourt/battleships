@@ -14,4 +14,22 @@ export function validateShipPlacement(coordinates, shipSize, orientation) {
     }
   }
 
-  
+  export function validateCell(board, row, col, isOccupied) {
+    if (!isOccupied) {
+      board[row][col][1] = true;
+      return true; // Cell was successfully occupied
+    } else {
+      // Reject if the cell is already occupied
+      throw new Error('Existing ship within coordinates');
+    }
+  }
+
+  export function validateYBoundary(rows, row){
+  if (row >= rows) {
+    throw new Error('Out of boundaries');
+  }}
+  export function validateXBoundary(cols, col) {
+    if (col >= cols) {
+      throw new Error('Out of boundaries');
+    }
+  }
