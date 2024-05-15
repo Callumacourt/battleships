@@ -1,4 +1,4 @@
-import { validateShipPlacement, validateCell, validateYBoundary} from "./validate";
+import { validateShipPlacement, validateCell, validateYBoundary, validateXBoundary} from "./validate";
 
 export class gameboard {
   constructor() {
@@ -40,7 +40,9 @@ export class gameboard {
   
       for (let i = 0; i < shipSize; i += 1) {
         const row = startRow + i;
-        validateYBoundary(this.rows, row)
+
+        validateYBoundary(this.rows, row) // validation
+
         const currentCoordinate = `${letters[row]}${startCol + 1}`;
         this.occupyCell(currentCoordinate);
       }
@@ -52,9 +54,9 @@ export class gameboard {
   
       for (let i = 0; i < shipSize; i += 1) {
         const col = startCol + i;
-        if (col >= this.columns) {
-          throw new Error('Out of boundaries');
-        }
+
+        validateXBoundary(col, this.columns) // validation
+
         const currentCoordinate = `${letters[startRow]}${col + 1}`;
         this.occupyCell(currentCoordinate);
       }

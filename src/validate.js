@@ -28,8 +28,9 @@ export function validateShipPlacement(coordinates, shipSize, orientation) {
   if (row >= rows) {
     throw new Error('Out of boundaries');
   }}
-  export function validateXBoundary(cols, col) {
-    if (col >= cols) {
+  
+  export function validateXBoundary(col, columns) {
+    if (col >= columns) {
       throw new Error('Out of boundaries');
     }
   }
