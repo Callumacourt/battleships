@@ -345,6 +345,7 @@ expect(() => gameBoard.placeShip('i3', 4, 'y')).toThrowError(
       gameBoard.receiveAttack('a1')
       gameBoard.receiveAttack('a1')
       gameBoard.receiveAttack('a1')
+      expect(gameBoard.ships.find(ship => ship.occupiedCells.includes('a1'))).toBe(undefined)
       expect(gameBoard.receiveAttack('a1')).toBe('sunk')
 
       })
