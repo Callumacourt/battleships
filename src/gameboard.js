@@ -84,18 +84,21 @@ export class gameboard {
   receiveAttack(coordinates) {
     const [row, col] = this.coordinateMap[coordinates];
     const [_, isOccupied, shipIdentity] = this.board[row][col];
+  
     if (!isOccupied) {
       this.board[row][col] = [coordinates, false, null];
       return 'miss';
     } else {
-      const ship = this.ships.find(ship => ship.identity === shipIdentity); // Retrieve the ship instance based on the stored reference
+      const ship = this.ships.find(ship => ship.identity === shipIdentity);
       ship.hit();
       const hitCellIndx = ship.occupiedCells.indexOf(coordinates.toString());
       ship.occupiedCells.splice(hitCellIndx, 1);
-      return 'hit'
+  
       if (ship.occupiedCells.length === 0) {
         // Ship is sunk
-       
+        return 'sunk';
+      } else {
+        return ship.hitCount;
       }
     }
   }

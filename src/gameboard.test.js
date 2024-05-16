@@ -326,15 +326,12 @@ expect(() => gameBoard.placeShip('i3', 4, 'y')).toThrowError(
         const gameBoard = new gameboard();
         gameBoard.placeShip('a1', 4, 'x');
       
-        // Get the ship instance that occupies the 'a1' coordinate
-        const ship = gameBoard.ships.find(s => s.occupiedCells.includes('a1'));
-      
-        // Check the initial hitCount
-        expect(ship.hitCount).toBe(0);
-      
-        // Call receiveAttack
+        const ship = gameBoard.ships.find(ship => ship.occupiedCells.includes('a1'));
+       
+        expect(ship.hits).toBe(0);
+    
         gameBoard.receiveAttack('a1');
       
         // Check if the hitCount is updated
-        expect(ship.hitCount).toBe(1);
+        expect(ship.hits).toBe(1);
       })})
