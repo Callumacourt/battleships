@@ -1,8 +1,10 @@
 class Ship {
-  constructor(length) {
-    this.length = length;
+  constructor(shipSize, coordinates) {
+    this.shipSize = shipSize;
+    this.coordinates = coordinates;
+    this.occupiedCells = [];
     this.hits = 0;
-    this.beenSunk = false;
+    this.identity = generateUniqueId(); // Generate a unique ID for the ship
   }
 
   hit() {
@@ -10,11 +12,12 @@ class Ship {
   }
 
   isSunk() {
-    if (this.hits >= this.length) {
-      this.beenSunk = true;
-      return true;
-    }
+    return this.hits === this.shipSize;
   }
 }
 
-module.exports = Ship;
+// Helper function to generate a unique ID
+function generateUniqueId() {
+  return Math.random().toString(36).substring(2, 9);
+}
+  module.exports = Ship;

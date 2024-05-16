@@ -48,15 +48,17 @@ describe('Gameboard', () => {
 
   test('Correctly places ship horizontally', () => {
     gameBoard.placeShip('a4', 4, 'x');
+    const shipIdentity = gameBoard.ships[0].identity;
+  
     const expectedBoard = [
       [
         ['a1', false],
         ['a2', false],
         ['a3', false],
-        ['a4', true],
-        ['a5', true],
-        ['a6', true],
-        ['a7', true],
+        ['a4', true, shipIdentity],
+        ['a5', true, shipIdentity],
+        ['a6', true, shipIdentity],
+        ['a7', true, shipIdentity],
         ['a8', false],
         ['a9', false],
         ['a10', false],
@@ -175,10 +177,11 @@ describe('Gameboard', () => {
   });
   test('correctly places ship vertically', () =>{
     gameBoard.placeShip('a1', 4, 'y');
+    const shipIdentity = gameBoard.ships[0].identity;
     const expectedBoard = [
       
       [
-        ['a1', true],
+        ['a1', true, shipIdentity],
         ['a2', false],
         ['a3', false],
         ['a4', false],
@@ -190,7 +193,7 @@ describe('Gameboard', () => {
         ['a10', false],
       ],
       [
-        ['b1', true],
+        ['b1', true, shipIdentity],
         ['b2', false],
         ['b3', false],
         ['b4', false],
@@ -202,7 +205,7 @@ describe('Gameboard', () => {
         ['b10', false],
       ],
       [
-        ['c1', true],
+        ['c1', true, shipIdentity],
         ['c2', false],
         ['c3', false],
         ['c4', false],
@@ -214,7 +217,7 @@ describe('Gameboard', () => {
         ['c10', false],
       ],
       [
-        ['d1', true],
+        ['d1', true, shipIdentity],
         ['d2', false],
         ['d3', false],
         ['d4', false],
@@ -318,4 +321,20 @@ expect(() => gameBoard.placeShip('i3', 4, 'y')).toThrowError(
       'Existing ship within coordinates'
       )
       })
-});
+
+      test('correctly records attacks on squares', () => {
+        const gameBoard = new gameboard();
+        gameBoard.placeShip('a1', 4, 'x');
+      
+        // Get the ship instance that occupies the 'a1' coordinate
+        const ship = gameBoard.ships.find(s => s.occupiedCells.includes('a1'));
+      
+        // Check the initial hitCount
+        expect(ship.hitCount).toBe(0);
+      
+        // Call receiveAttack
+        gameBoard.receiveAttack('a1');
+      
+        // Check if the hitCount is updated
+        expect(ship.hitCount).toBe(1);
+      })})

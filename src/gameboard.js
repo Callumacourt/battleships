@@ -1,4 +1,5 @@
 import { validateShipPlacement, validateCell, validateYBoundary, validateXBoundary} from "./validate";
+import Ship from "./ship";
 
 export class gameboard {
   constructor() {
@@ -6,6 +7,7 @@ export class gameboard {
     this.columns = 10;
     this.board = [];
     this.coordinateMap = {};
+    this.ships = []
     this.createGameboard();
   }
 
@@ -25,14 +27,25 @@ export class gameboard {
     }
   }
 
-  occupyCell(coordinate) {
+  occupyCell(coordinate, shipIdentity) {
     const [row, col] = this.coordinateMap[coordinate];
     const [_, isOccupied] = this.board[row][col];
-    return validateCell(this.board, row, col, isOccupied);
+  
+    if (!isOccupied) {
+      this.board[row][col] = [coordinate, true, shipIdentity];
+      return true;
+    } else {
+      throw new Error('Existing ship within coordinates');
+    }
   }
 
   placeShip(coordinates, shipSize, orientation) {
-    validateShipPlacement(coordinates, shipSize, orientation);
+  validateShipPlacement(coordinates, shipSize, orientation);
+  const ship = new Ship(shipSize, coordinates)
+  this.ships.push(ship)
+  const occupiedCells = []
+
+    
   
     if (orientation === 'y') {
       let [startRow, startCol] = this.coordinateMap[coordinates];
@@ -44,7 +57,9 @@ export class gameboard {
         validateYBoundary(this.rows, row) // validation
 
         const currentCoordinate = `${letters[row]}${startCol + 1}`;
-        this.occupyCell(currentCoordinate);
+        this.occupyCell(currentCoordinate, ship.identity)
+        occupiedCells.push(currentCoordinate)
+        ship.occupiedCells = occupiedCells
       }
     }
   
@@ -58,11 +73,30 @@ export class gameboard {
         validateXBoundary(col, this.columns) // validation
 
         const currentCoordinate = `${letters[startRow]}${col + 1}`;
-        this.occupyCell(currentCoordinate);
+        this.occupyCell(currentCoordinate, ship.identity);
+        occupiedCells.push(currentCoordinate)
+        ship.occupiedCells = occupiedCells
+      }
+    }
+    ship.occupiedCells =occupiedCells
+  }
+
+  receiveAttack(coordinates) {
+    const [row, col] = this.coordinateMap[coordinates];
+    const [_, isOccupied, shipIdentity] = this.board[row][col];
+    if (!isOccupied) {
+      this.board[row][col] = [coordinates, false, null];
+      return 'miss';
+    } else {
+      const ship = this.ships.find(ship => ship.identity === shipIdentity); // Retrieve the ship instance based on the stored reference
+      ship.hit();
+      const hitCellIndx = ship.occupiedCells.indexOf(coordinates.toString());
+      ship.occupiedCells.splice(hitCellIndx, 1);
+      return 'hit'
+      if (ship.occupiedCells.length === 0) {
+        // Ship is sunk
+       
       }
     }
   }
-
-n
   }
-
