@@ -335,3 +335,16 @@ expect(() => gameBoard.placeShip('i3', 4, 'y')).toThrowError(
         // Check if the hitCount is updated
         expect(ship.hits).toBe(1);
       })})
+
+      test('correctly records ship sinkage', () => {
+      const gameBoard = new gameboard();
+      gameBoard.placeShip('a1', 4, 'x')
+
+      const ship = gameBoard.ships.find(ship => ship.occupiedCells.includes('a1'))
+      expect(ship.hits).toBe(0)
+      gameBoard.receiveAttack('a1')
+      gameBoard.receiveAttack('a1')
+      gameBoard.receiveAttack('a1')
+      expect(gameBoard.receiveAttack('a1')).toBe('sunk')
+
+      })

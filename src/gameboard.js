@@ -95,10 +95,11 @@ export class gameboard {
       ship.occupiedCells.splice(hitCellIndx, 1);
   
       if (ship.occupiedCells.length === 0) {
-        // Ship is sunk
+        // Ship is sunk, remove it from the ships array
+        this.ships = this.ships.filter(s => s.identity !== shipIdentity);
         return 'sunk';
       } else {
-        return ship.hitCount;
+        return ship.hits;
       }
     }
   }
