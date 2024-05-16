@@ -334,7 +334,7 @@ expect(() => gameBoard.placeShip('i3', 4, 'y')).toThrowError(
       
         // Check if the hitCount is updated
         expect(ship.hits).toBe(1);
-      })})
+      })
 
       test('correctly records ship sinkage', () => {
       const gameBoard = new gameboard();
@@ -349,3 +349,13 @@ expect(() => gameBoard.placeShip('i3', 4, 'y')).toThrowError(
       expect(gameBoard.receiveAttack('a1')).toBe('sunk')
 
       })
+
+      test('correctly handles missed hits', () =>{
+      const gameBoard = new gameboard();
+      gameBoard.placeShip('a2', 4, 'y')
+
+      gameBoard.receiveAttack('e3')
+      expect(gameBoard.missedHits).toContain('e3')
+      })
+    
+    })

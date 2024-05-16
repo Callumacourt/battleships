@@ -9,6 +9,7 @@ export class gameboard {
     this.coordinateMap = {};
     this.ships = []
     this.createGameboard();
+    this.missedHits = []
   }
 
   createGameboard() {
@@ -87,6 +88,7 @@ export class gameboard {
   
     if (!isOccupied) {
       this.board[row][col] = [coordinates, false, null];
+      this.missedHits.push(coordinates)
       return 'miss';
     } else {
       const ship = this.ships.find(ship => ship.identity === shipIdentity);
