@@ -1,4 +1,9 @@
-import { validateShipPlacement, validateCell, validateYBoundary, validateXBoundary} from "./validate";
+import {
+  validateShipPlacement,
+  validateCell,
+  validateYBoundary,
+  validateXBoundary,
+} from "./validate";
 import Ship from "./ship";
 
 export class gameboard {
@@ -7,14 +12,14 @@ export class gameboard {
     this.columns = 10;
     this.board = [];
     this.coordinateMap = {};
-    this.ships = []
+    this.ships = [];
     this.createGameboard();
-    this.missedHits = []
-    this.gameStarted = false
+    this.missedHits = [];
+    this.gameStarted = false;
   }
 
   createGameboard() {
-    const letters = 'abcdefghij';
+    const letters = "abcdefghij";
 
     for (let i = 0; i < this.rows; i++) {
       this.board[i] = new Array(this.columns);
@@ -32,89 +37,86 @@ export class gameboard {
   occupyCell(coordinate, shipIdentity) {
     const [row, col] = this.coordinateMap[coordinate];
     const [_, isOccupied] = this.board[row][col];
-  
+
     if (!isOccupied) {
       this.board[row][col] = [coordinate, true, shipIdentity];
       return true;
     } else {
-      throw new Error('Existing ship within coordinates');
+      throw new Error("Existing ship within coordinates");
     }
   }
 
   placeShip(coordinates, shipSize, orientation) {
-  validateShipPlacement(coordinates, shipSize, orientation);
-  const ship = new Ship(shipSize, coordinates)
-  this.ships.push(ship)
-  const occupiedCells = []
+    validateShipPlacement(coordinates, shipSize, orientation);
+    const ship = new Ship(shipSize, coordinates);
+    this.ships.push(ship);
+    const occupiedCells = [];
 
-    
-  
-    if (orientation === 'y') {
+    if (orientation === "y") {
       let [startRow, startCol] = this.coordinateMap[coordinates];
-      const letters = 'abcdefghij';
-  
+      const letters = "abcdefghij";
+
       for (let i = 0; i < shipSize; i += 1) {
         const row = startRow + i;
 
-        validateYBoundary(this.rows, row) // validation
+        validateYBoundary(this.rows, row); // validation
 
         const currentCoordinate = `${letters[row]}${startCol + 1}`;
-        this.occupyCell(currentCoordinate, ship.identity)
-        occupiedCells.push(currentCoordinate)
-        ship.occupiedCells = occupiedCells
+        this.occupyCell(currentCoordinate, ship.identity);
+        occupiedCells.push(currentCoordinate);
+        ship.occupiedCells = occupiedCells;
       }
     }
-  
-    if (orientation === 'x') {
+
+    if (orientation === "x") {
       let [startRow, startCol] = this.coordinateMap[coordinates];
-      const letters = 'abcdefghij';
-  
+      const letters = "abcdefghij";
+
       for (let i = 0; i < shipSize; i += 1) {
         const col = startCol + i;
 
-        validateXBoundary(col, this.columns) // validation
+        validateXBoundary(col, this.columns); // validation
 
         const currentCoordinate = `${letters[startRow]}${col + 1}`;
         this.occupyCell(currentCoordinate, ship.identity);
-        occupiedCells.push(currentCoordinate)
-        ship.occupiedCells = occupiedCells
+        occupiedCells.push(currentCoordinate);
+        ship.occupiedCells = occupiedCells;
       }
     }
-    ship.occupiedCells =occupiedCells
-    this.gameStarted = true
+    ship.occupiedCells = occupiedCells;
+    this.gameStarted = true;
   }
 
-  isGameOver(){
-  if(this.gameStarted === true && this.ships.length === 0){
-  return true
-  }else{
-  return false
-  }
+  isGameOver() {
+    if (this.gameStarted === true && this.ships.length === 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   receiveAttack(coordinates) {
     const [row, col] = this.coordinateMap[coordinates];
     const [_, isOccupied, shipIdentity] = this.board[row][col];
-  
+
     if (!isOccupied) {
       this.board[row][col] = [coordinates, false, null];
-      this.missedHits.push(coordinates)
-      return 'miss';
+      this.missedHits.push(coordinates);
+      return "miss";
     } else {
-      const ship = this.ships.find(ship => ship.identity === shipIdentity);
+      const ship = this.ships.find((ship) => ship.identity === shipIdentity);
       ship.hit();
       const hitCellIndx = ship.occupiedCells.indexOf(coordinates.toString());
       ship.occupiedCells.splice(hitCellIndx, 1);
-  
+
       if (ship.occupiedCells.length === 0) {
         // Ship is sunk, remove it from the ships array
-        this.ships = this.ships.filter(s => s.identity !== shipIdentity);
-        this.isGameOver()
-        return 'sunk';
-  
+        this.ships = this.ships.filter((s) => s.identity !== shipIdentity);
+        this.isGameOver();
+        return "sunk";
       } else {
         return ship.hits;
       }
     }
   }
-  }
+}

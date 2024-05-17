@@ -2,8 +2,7 @@
 import { gameboard } from './gameboard';
 import Ship from './ship';
 
-
-let gameBoard
+let gameBoard;
 describe('Gameboard', () => {
   let gameBoard;
 
@@ -23,7 +22,7 @@ describe('Gameboard', () => {
       ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9', 'h10'],
       ['i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10'],
       ['j1', 'j2', 'j3', 'j4', 'j5', 'j6', 'j7', 'j8', 'j9', 'j10'],
-    ].map(row => row.map(cell => [cell, false]));
+    ].map((row) => row.map((cell) => [cell, false]));
 
     expect(gameBoard.board).toEqual(expectedBoard);
   });
@@ -49,7 +48,7 @@ describe('Gameboard', () => {
   test('Correctly places ship horizontally', () => {
     gameBoard.placeShip('a4', 4, 'x');
     const shipIdentity = gameBoard.ships[0].identity;
-  
+
     const expectedBoard = [
       [
         ['a1', false],
@@ -175,11 +174,10 @@ describe('Gameboard', () => {
 
     expect(gameBoard.board).toEqual(expectedBoard);
   });
-  test('correctly places ship vertically', () =>{
+  test('correctly places ship vertically', () => {
     gameBoard.placeShip('a1', 4, 'y');
     const shipIdentity = gameBoard.ships[0].identity;
     const expectedBoard = [
-      
       [
         ['a1', true, shipIdentity],
         ['a2', false],
@@ -300,63 +298,68 @@ describe('Gameboard', () => {
         ['j9', false],
         ['j10', false],
       ],
-    ]
-    expect(gameBoard.board).toEqual(expectedBoard); 
-  })
+    ];
+    expect(gameBoard.board).toEqual(expectedBoard);
+  });
 
-  test('rejects ships out of boundaries for Y coords', () =>{
-expect(() => gameBoard.placeShip('i3', 4, 'y')).toThrowError(
-'Out of boundaries')
-  })
+  test('rejects ships out of boundaries for Y coords', () => {
+    expect(() => gameBoard.placeShip('i3', 4, 'y')).toThrowError(
+      'Out of boundaries'
+    );
+  });
 
-  test('rejects ships out of boundaries for X coords', () =>{
-  expect(() => gameBoard.placeShip('i8', 4, 'x')).toThrowError(
-    'Out of boundaries'
-    )
-      })
+  test('rejects ships out of boundaries for X coords', () => {
+    expect(() => gameBoard.placeShip('i8', 4, 'x')).toThrowError(
+      'Out of boundaries'
+    );
+  });
 
-      test('rejects duplicate ship placement', () => {
-      gameBoard.placeShip('a1', 4, 'x')
-      expect(() => gameBoard.placeShip('a1', 4, 'x')).toThrowError(
+  test('rejects duplicate ship placement', () => {
+    gameBoard.placeShip('a1', 4, 'x');
+    expect(() => gameBoard.placeShip('a1', 4, 'x')).toThrowError(
       'Existing ship within coordinates'
-      )
-      })
+    );
+  });
 
-      test('correctly records attacks on squares', () => {
-        const gameBoard = new gameboard();
-        gameBoard.placeShip('a1', 4, 'x');
-      
-        const ship = gameBoard.ships.find(ship => ship.occupiedCells.includes('a1'));
-       
-        expect(ship.hits).toBe(0);
-    
-        gameBoard.receiveAttack('a1');
-      
-        // Check if the hitCount is updated
-        expect(ship.hits).toBe(1);
-      })
+  test('correctly records attacks on squares', () => {
+    const gameBoard = new gameboard();
+    gameBoard.placeShip('a1', 4, 'x');
 
-      test('correctly records ship sinkage', () => {
-      const gameBoard = new gameboard();
-      gameBoard.placeShip('a1', 4, 'x')
+    const ship = gameBoard.ships.find((ship) =>
+      ship.occupiedCells.includes('a1')
+    );
 
-      const ship = gameBoard.ships.find(ship => ship.occupiedCells.includes('a1'))
-      expect(ship.hits).toBe(0)
-      gameBoard.receiveAttack('a1')
-      gameBoard.receiveAttack('a1')
-      gameBoard.receiveAttack('a1')
-      expect(gameBoard.ships.find(ship => ship.occupiedCells.includes('a1'))).toBe(undefined)
-      expect(gameBoard.receiveAttack('a1')).toBe('sunk')
-      expect(gameBoard.isGameOver() === true)
+    expect(ship.hits).toBe(0);
 
-      })
+    gameBoard.receiveAttack('a1');
 
-      test('correctly handles missed hits', () =>{
-      const gameBoard = new gameboard();
-      gameBoard.placeShip('a2', 4, 'y')
+    // Check if the hitCount is updated
+    expect(ship.hits).toBe(1);
+  });
 
-      gameBoard.receiveAttack('e3')
-      expect(gameBoard.missedHits).toContain('e3')
-      })
-    
-    })
+  test('correctly records ship sinkage', () => {
+    const gameBoard = new gameboard();
+    gameBoard.placeShip('a1', 4, 'x');
+
+    const ship = gameBoard.ships.find((ship) =>
+      ship.occupiedCells.includes('a1')
+    );
+    expect(ship.hits).toBe(0);
+    gameBoard.receiveAttack('a1');
+    gameBoard.receiveAttack('a1');
+    gameBoard.receiveAttack('a1');
+    expect(
+      gameBoard.ships.find((ship) => ship.occupiedCells.includes('a1'))
+    ).toBe(undefined);
+    expect(gameBoard.receiveAttack('a1')).toBe('sunk');
+    expect(gameBoard.isGameOver() === true);
+  });
+
+  test('correctly handles missed hits', () => {
+    const gameBoard = new gameboard();
+    gameBoard.placeShip('a2', 4, 'y');
+
+    gameBoard.receiveAttack('e3');
+    expect(gameBoard.missedHits).toContain('e3');
+  });
+});
