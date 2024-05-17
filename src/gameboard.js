@@ -10,6 +10,7 @@ export class gameboard {
     this.ships = []
     this.createGameboard();
     this.missedHits = []
+    this.gameStarted = false
   }
 
   createGameboard() {
@@ -80,6 +81,15 @@ export class gameboard {
       }
     }
     ship.occupiedCells =occupiedCells
+    this.gameStarted = true
+  }
+
+  isGameOver(){
+  if(this.gameStarted === true && this.ships.length === 0){
+  return true
+  }else{
+  return false
+  }
   }
 
   receiveAttack(coordinates) {
@@ -99,7 +109,9 @@ export class gameboard {
       if (ship.occupiedCells.length === 0) {
         // Ship is sunk, remove it from the ships array
         this.ships = this.ships.filter(s => s.identity !== shipIdentity);
+        this.isGameOver()
         return 'sunk';
+  
       } else {
         return ship.hits;
       }
