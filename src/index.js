@@ -1,5 +1,6 @@
-import { gameboard } from './gameboard';
-import { createGrid } from './ui';
+import { bindEventListeners, createGrid } from './ui';
+import * as css from './style.css';
 document.addEventListener('DOMContentLoaded', () => {
   createGrid();
+  bindEventListeners();
 });

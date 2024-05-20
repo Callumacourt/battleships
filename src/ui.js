@@ -1,6 +1,5 @@
-import { Game } from './game';
-
-const gridContainer = document.querySelector('.gridContainer');
+const playerGridContainer = document.querySelector('.playerGridContainer');
+const computerGridContainer = document.querySelector('.computerGridContainer');
 
 export function createGrid() {
   for (let row = 0; row < 10; row++) {
@@ -8,24 +7,21 @@ export function createGrid() {
       const cell = document.createElement('div');
       cell.classList.add('cell');
       cell.classList.add(`cell-${col}-${row}`); // Add coordinate as a class
-      gridContainer.appendChild(cell);
+      playerGridContainer.appendChild(cell);
+
+      const computerCell = document.createElement('div');
+      computerCell.classList.add('cell');
+      computerCell.classList.add(`cell-${col}-${row}`);
+      computerGridContainer.appendChild(computerCell);
     }
   }
 }
 
-export class UI {
-  constructor() {
-    this.game = new Game();
-    this.bindEventListeners();
-  }
-
-  bindEventListeners() {
-    const cells = document.querySelectorAll('.cell');
-    cells.forEach((cell) => {
-      cell.addEventListener('click', () => {
-        const move = cell.dataset.index;
-        this.game.handleMove(this.game.humanPlayer, move);
-      });
+export function bindEventListeners() {
+  const cells = document.querySelectorAll('.cell');
+  cells.forEach((cell) => {
+    cell.addEventListener('click', () => {
+      console.log('test');
     });
-  }
+  });
 }
