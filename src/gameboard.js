@@ -3,8 +3,8 @@ import {
   validateCell,
   validateYBoundary,
   validateXBoundary,
-} from "./validate";
-import Ship from "./ship";
+} from './validate';
+import Ship from './ship';
 
 export class gameboard {
   constructor() {
@@ -19,7 +19,7 @@ export class gameboard {
   }
 
   createGameboard() {
-    const letters = "abcdefghij";
+    const letters = 'abcdefghij';
 
     for (let i = 0; i < this.rows; i++) {
       this.board[i] = new Array(this.columns);
@@ -42,7 +42,7 @@ export class gameboard {
       this.board[row][col] = [coordinate, true, shipIdentity];
       return true;
     } else {
-      throw new Error("Existing ship within coordinates");
+      throw new Error('Existing ship within coordinates');
     }
   }
 
@@ -52,9 +52,9 @@ export class gameboard {
     this.ships.push(ship);
     const occupiedCells = [];
 
-    if (orientation === "y") {
+    if (orientation === 'y') {
       let [startRow, startCol] = this.coordinateMap[coordinates];
-      const letters = "abcdefghij";
+      const letters = 'abcdefghij';
 
       for (let i = 0; i < shipSize; i += 1) {
         const row = startRow + i;
@@ -68,9 +68,9 @@ export class gameboard {
       }
     }
 
-    if (orientation === "x") {
+    if (orientation === 'x') {
       let [startRow, startCol] = this.coordinateMap[coordinates];
-      const letters = "abcdefghij";
+      const letters = 'abcdefghij';
 
       for (let i = 0; i < shipSize; i += 1) {
         const col = startCol + i;
@@ -102,7 +102,7 @@ export class gameboard {
     if (!isOccupied) {
       this.board[row][col] = [coordinates, false, null];
       this.missedHits.push(coordinates);
-      return "miss";
+      return 'miss';
     } else {
       const ship = this.ships.find((ship) => ship.identity === shipIdentity);
       ship.hit();
@@ -113,7 +113,7 @@ export class gameboard {
         // Ship is sunk, remove it from the ships array
         this.ships = this.ships.filter((s) => s.identity !== shipIdentity);
         this.isGameOver();
-        return "sunk";
+        return 'sunk';
       } else {
         return ship.hits;
       }

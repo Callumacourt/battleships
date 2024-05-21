@@ -1,23 +1,20 @@
-import Player from './player';
 import { gameboard } from './gameboard';
+import { UI } from './ui';
 
 export class Game {
   constructor() {
-    this.humanPlayer = new Player('human');
-    this.computerPlayer = new Player('computer');
-  }
-  startGame() {
-    this.humanPlayerPlayer.gameboard.placeShip('a1', 4, 'x');
-    this.humanPlayer.gameboard.placeShip('b1', 5, 'y');
-    this.humanPlayer.gameboard.placeShip('c2', 3, 'x');
-    this.humanPlayer.gameboard.placeShip('d2', 3, 'x');
-    this.humanPlayer.gameboard.placeShip('f4,', 2, 'x');
+    this.playerBoard = new gameboard();
+    this.computerBoard = new gameboard();
 
-    this.computerPlayer.gameboard.placeShip('e3', 4, 'x');
-    this.computerPlayer.gameboard.placeShip('c2', 3, 'x');
-    this.computerPlayer.gameboard.placeShip('f2', 4, 'x');
-    this.computerPlayer.gameboard.placeShip('a1', 4, 'x');
-    this.computerPlayer.gameboard.placeShip('b1', 5, 'y');
+    this.playerBoard.placeShip('a1', 5, 'x');
+    this.playerBoard.placeShip('c4', 4, 'y');
+
+    this.ui = new UI(
+      this.playerBoard,
+      document.querySelector('.playerGridContainer'),
+      document.querySelector('.computerGridContainer')
+    );
   }
-  handleMove() {}
+
+  start() {}
 }
