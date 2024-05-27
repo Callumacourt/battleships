@@ -1,9 +1,9 @@
 import {
   validateShipPlacement,
-  validateCell,
   validateYBoundary,
   validateXBoundary,
 } from './validate';
+
 import Ship from './ship';
 
 export class gameboard {
@@ -11,7 +11,7 @@ export class gameboard {
     this.rows = 10;
     this.columns = 10;
     this.board = [];
-    this.coordinateMap = {};
+    this.coordinateMap = [];
     this.ships = [];
     this.createGameboard();
     this.missedHits = [];
@@ -19,7 +19,7 @@ export class gameboard {
   }
 
   createGameboard() {
-    const letters = 'abcdefghij';
+    const letters = 'ABCDEFGHIJ';
 
     for (let i = 0; i < this.rows; i++) {
       this.board[i] = new Array(this.columns);
@@ -29,13 +29,19 @@ export class gameboard {
         const values = [i, j, 0];
 
         this.board[i][j] = [coordinate, false]; // Initialize with coordinate and occupied = false
-        this.coordinateMap[coordinate] = values;
+        this.coordinateMap[coordinate.toUpperCase()] = values;
       }
     }
   }
 
   occupyCell(coordinate, shipIdentity) {
-    const [row, col] = this.coordinateMap[coordinate];
+    const values = this.coordinateMap[coordinate];
+
+    if (!values) {
+      throw new Error(`Invalid coordinate: ${coordinate}`);
+    }
+
+    const [row, col] = values;
     const [_, isOccupied] = this.board[row][col];
 
     if (!isOccupied) {
@@ -54,7 +60,7 @@ export class gameboard {
 
     if (orientation === 'y') {
       let [startRow, startCol] = this.coordinateMap[coordinates];
-      const letters = 'abcdefghij';
+      const letters = 'ABCDEFGHIJ';
 
       for (let i = 0; i < shipSize; i += 1) {
         const row = startRow + i;
@@ -70,7 +76,7 @@ export class gameboard {
 
     if (orientation === 'x') {
       let [startRow, startCol] = this.coordinateMap[coordinates];
-      const letters = 'abcdefghij';
+      const letters = 'ABCDEFGHIJ';
 
       for (let i = 0; i < shipSize; i += 1) {
         const col = startCol + i;
@@ -96,8 +102,20 @@ export class gameboard {
   }
 
   receiveAttack(coordinates) {
-    const [row, col] = this.coordinateMap[coordinates];
-    const [_, isOccupied, shipIdentity] = this.board[row][col];
+    const coordUpper = coordinates.toUpperCase();
+
+    if (!this.coordinateMap[coordUpper]) {
+      throw new Error(`Invalid coordinate: ${coordinates}`);
+    }
+
+    const [row, col] = this.coordinateMap[coordUpper];
+    const cell = this.board[row][col];
+
+    if (!cell) {
+      throw new Error(`Invalid cell: [${row}, ${col}]`);
+    }
+
+    const [_, isOccupied, shipIdentity] = cell;
 
     if (!isOccupied) {
       this.board[row][col] = [coordinates, false, null];

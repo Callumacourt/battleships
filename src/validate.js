@@ -1,6 +1,6 @@
 export function validateShipPlacement(coordinates, shipSize, orientation) {
   // Validation
-  if (!/^([a-j])(10|[1-9])$/.test(coordinates)) {
+  if (!/^([A-Ja-j])(10|[1-9])$/.test(coordinates)) {
     throw new Error('Invalid coordinates');
   }
   const validSizes = [1, 2, 3, 4, 5];
