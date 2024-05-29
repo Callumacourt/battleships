@@ -94,48 +94,49 @@ export class gameboard {
 
   receiveAttack(coordinates) {
     const coordUpper = coordinates.toUpperCase();
-
     if (!this.coordinateMap[coordUpper]) {
       throw new Error(`Invalid coordinate: ${coordinates}`);
     }
 
     const [row, col] = this.coordinateMap[coordUpper];
     const cell = this.board[row][col];
-
     if (!cell) {
       throw new Error(`Invalid cell: [${row}, ${col}]`);
     }
 
     const [_, isOccupied] = cell;
-
     if (!isOccupied) {
       this.board[row][col] = [coordinates, false, null];
       this.missedHits.push(coordinates);
-      console.log(this.ships);
       return 'miss';
-    } else if (isOccupied) {
+    } else {
       const coordinate = this.board[row][col];
       let parentShip;
       for (const ship of this.ships) {
         if (ship.occupiedCells.includes(coordinate)) {
           parentShip = ship;
-          console.log(parentShip);
           break;
         }
       }
 
-      return 'hit';
-    } else {
-      console.log(this.ships[shipIdentity]);
-      const ship = this.ships[shipIdentity]; // Get the ship using its identity
-      if (ship.occupiedCells.length === 0) {
-        // Ship is sunk, remove it from the ships array
-        this.ships = this.ships.filter((s) => s.identity !== shipIdentity);
-        this.isGameOver();
-        return 'sunk';
-      } else {
-        return ship.hits;
+      if (!parentShip) {
+        throw new Error('Parent ship not found');
       }
+
+      parentShip.hit();
+      this.board[row][col][1] = false; // Set the cell to occupied = false after a hit
+
+      if (parentShip.isSunk()) {
+        parentShip.removeOccupiedCell(coordinate);
+        if (parentShip.occupiedCells.length === 0) {
+          this.ships = this.ships.filter((ship) => ship !== parentShip);
+          this.isGameOver();
+        }
+        return 'sunk';
+      }
+
+      parentShip.removeOccupiedCell(coordinate);
+      return 'hit';
     }
   }
 }

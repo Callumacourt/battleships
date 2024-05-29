@@ -12,7 +12,14 @@ class Ship {
   }
 
   isSunk() {
-    return this.hits === this.shipSize;
+    return this.hits >= this.shipSize;
+  }
+
+  removeOccupiedCell(coordinate) {
+    const index = this.occupiedCells.indexOf(coordinate);
+    if (index !== -1) {
+      this.occupiedCells.splice(index, 1);
+    }
   }
 }
 
@@ -20,4 +27,5 @@ class Ship {
 function generateUniqueId() {
   return Math.random().toString(36).substring(2, 9);
 }
+
 module.exports = Ship;
