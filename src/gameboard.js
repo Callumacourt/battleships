@@ -34,7 +34,7 @@ export class gameboard {
     }
   }
 
-  occupyCell(coordinate, shipIdentity) {
+  occupyCell(coordinate, ship) {
     const values = this.coordinateMap[coordinate];
 
     if (!values) {
@@ -45,51 +45,42 @@ export class gameboard {
     const [_, isOccupied] = this.board[row][col];
 
     if (!isOccupied) {
-      this.board[row][col] = [coordinate, true, shipIdentity];
+      this.board[row][col] = [coordinate, true];
+
+      ship.occupiedCells.push(this.board[row][col]);
       return true;
     } else {
       throw new Error('Existing ship within coordinates');
     }
   }
-
   placeShip(coordinates, shipSize, orientation) {
     validateShipPlacement(coordinates, shipSize, orientation);
     const ship = new Ship(shipSize, coordinates);
     this.ships.push(ship);
-    const occupiedCells = [];
 
-    if (orientation === 'y') {
+    if (orientation === 'Y') {
       let [startRow, startCol] = this.coordinateMap[coordinates];
       const letters = 'ABCDEFGHIJ';
-
       for (let i = 0; i < shipSize; i += 1) {
         const row = startRow + i;
-
         validateYBoundary(this.rows, row); // validation
-
         const currentCoordinate = `${letters[row]}${startCol + 1}`;
-        this.occupyCell(currentCoordinate, ship.identity);
-        occupiedCells.push(currentCoordinate);
-        ship.occupiedCells = occupiedCells;
+        this.occupyCell(currentCoordinate, ship);
       }
     }
 
-    if (orientation === 'x') {
+    if (orientation === 'X') {
       let [startRow, startCol] = this.coordinateMap[coordinates];
       const letters = 'ABCDEFGHIJ';
-
       for (let i = 0; i < shipSize; i += 1) {
         const col = startCol + i;
-
         validateXBoundary(col, this.columns); // validation
 
         const currentCoordinate = `${letters[startRow]}${col + 1}`;
-        this.occupyCell(currentCoordinate, ship.identity);
-        occupiedCells.push(currentCoordinate);
-        ship.occupiedCells = occupiedCells;
+        this.occupyCell(currentCoordinate, ship);
       }
     }
-    ship.occupiedCells = occupiedCells;
+
     this.gameStarted = true;
   }
 
@@ -115,18 +106,28 @@ export class gameboard {
       throw new Error(`Invalid cell: [${row}, ${col}]`);
     }
 
-    const [_, isOccupied, shipIdentity] = cell;
+    const [_, isOccupied] = cell;
 
     if (!isOccupied) {
       this.board[row][col] = [coordinates, false, null];
       this.missedHits.push(coordinates);
+      console.log(this.ships);
       return 'miss';
-    } else {
-      const ship = this.ships.find((ship) => ship.identity === shipIdentity);
-      ship.hit();
-      const hitCellIndx = ship.occupiedCells.indexOf(coordinates.toString());
-      ship.occupiedCells.splice(hitCellIndx, 1);
+    } else if (isOccupied) {
+      const coordinate = this.board[row][col];
+      let parentShip;
+      for (const ship of this.ships) {
+        if (ship.occupiedCells.includes(coordinate)) {
+          parentShip = ship;
+          console.log(parentShip);
+          break;
+        }
+      }
 
+      return 'hit';
+    } else {
+      console.log(this.ships[shipIdentity]);
+      const ship = this.ships[shipIdentity]; // Get the ship using its identity
       if (ship.occupiedCells.length === 0) {
         // Ship is sunk, remove it from the ships array
         this.ships = this.ships.filter((s) => s.identity !== shipIdentity);

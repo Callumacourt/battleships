@@ -21,11 +21,11 @@ export class Game {
   placeShips() {
     // Example ships with coordinates, sizes, and orientations
     const shipsToPlace = [
-      { coordinates: 'A1', size: 5, orientation: 'x' }, // Example: Aircraft carrier
-      { coordinates: 'B1', size: 4, orientation: 'x' }, // Example: Battleship
-      { coordinates: 'C1', size: 3, orientation: 'x' }, // Example: Cruiser
-      { coordinates: 'D1', size: 3, orientation: 'x' }, // Example: Submarine
-      { coordinates: 'E1', size: 2, orientation: 'x' }, // Example: Destroyer
+      { coordinates: 'A1', size: 5, orientation: 'X' }, // Example: Aircraft carrier
+      { coordinates: 'B1', size: 4, orientation: 'X' }, // Example: Battleship
+      { coordinates: 'C1', size: 3, orientation: 'X' }, // Example: Cruiser
+      { coordinates: 'D1', size: 3, orientation: 'X' }, // Example: Submarine
+      { coordinates: 'E1', size: 2, orientation: 'X' }, // Example: Destroyer
     ];
 
     shipsToPlace.forEach((ship) => {

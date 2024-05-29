@@ -35,7 +35,6 @@ export class UI {
   }
 
   bindEventListeners() {
-    console.log(this.gameboard);
     const cells = document.querySelectorAll('.cell');
     cells.forEach((cell) => {
       cell.addEventListener('click', () => {
