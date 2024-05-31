@@ -18,6 +18,7 @@ export class UI {
         cell.classList.add('cell');
         const coordinate = `${String.fromCharCode(65 + row)}${col + 1}`;
         cell.dataset.coordinate = coordinate;
+        cell.dataset.clicked = false;
         playerGridContainer.appendChild(cell);
       }
     }
@@ -38,9 +39,13 @@ export class UI {
     const cells = document.querySelectorAll('.cell');
     cells.forEach((cell) => {
       cell.addEventListener('click', () => {
+        if (cell.dataset.clicked === 'true') {
+          return;
+        }
         const coordinate = cell.dataset.coordinate;
         const result = this.gameboard.receiveAttack(coordinate);
         this.updateUI(coordinate, result);
+        cell.dataset.clicked = 'true';
       });
     });
   }
