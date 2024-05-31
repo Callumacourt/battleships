@@ -8,6 +8,7 @@ export class Game {
   constructor() {
     this.playerBoard = new gameboard();
     this.computerBoard = new gameboard();
+    this.turn = 'player';
 
     this.ui = new UI(
       this.playerBoard,

@@ -15,7 +15,7 @@ export class UI {
       for (let col = 0; col < 10; col++) {
         // Create cell for player grid
         const cell = document.createElement('div');
-        cell.classList.add('cell');
+        cell.classList.add('playerCell');
         const coordinate = `${String.fromCharCode(65 + row)}${col + 1}`;
         cell.dataset.coordinate = coordinate;
         cell.dataset.clicked = false;
@@ -27,7 +27,7 @@ export class UI {
       for (let col = 0; col < 10; col++) {
         // Create cell for computer grid
         const cell = document.createElement('div');
-        cell.classList.add('cell');
+        cell.classList.add('compCell');
         const coordinate = `${String.fromCharCode(65 + row)}${col + 1}`;
         cell.dataset.coordinate = coordinate;
         computerGridContainer.appendChild(cell);
@@ -36,7 +36,7 @@ export class UI {
   }
 
   bindEventListeners() {
-    const cells = document.querySelectorAll('.cell');
+    const cells = document.querySelectorAll('.compCell');
     cells.forEach((cell) => {
       cell.addEventListener('click', () => {
         if (cell.dataset.clicked === 'true') {
@@ -63,7 +63,7 @@ export class UI {
       }
 
       const cell = document.querySelector(
-        `.cell[data-coordinate="${cellCoordinate}"]`
+        `.compCell[data-coordinate="${cellCoordinate}"]`
       );
       if (cell) {
         cell.classList.add('ship'); // Add a class to indicate a ship is present
@@ -73,7 +73,7 @@ export class UI {
 
   updateUI(coordinate, result) {
     const cell = document.querySelector(
-      `.cell[data-coordinate="${coordinate}"]`
+      `.compCell[data-coordinate="${coordinate}"]`
     );
     if (result === 'miss') {
       cell.classList.add('missed');
@@ -82,6 +82,7 @@ export class UI {
       cell.classList.add('sunk');
     } else {
       cell.classList.add('hit');
+      console.log('s');
     }
   }
 }
