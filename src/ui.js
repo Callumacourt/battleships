@@ -35,11 +35,11 @@ export class UI {
     }
   }
 
-  bindEventListeners() {
+  bindEventListeners(isPlayerTurn) {
     const cells = document.querySelectorAll('.compCell');
     cells.forEach((cell) => {
       cell.addEventListener('click', () => {
-        if (cell.dataset.clicked === 'true') {
+        if (cell.dataset.clicked === 'true' || !isPlayerTurn) {
           return;
         }
         const coordinate = cell.dataset.coordinate;
@@ -50,7 +50,7 @@ export class UI {
     });
   }
 
-  updateShipOnUI(coordinate, size, orientation) {
+  updateShipOnUI(coordinate, size, orientation, isPlayerBoard = false) {
     const startRow = coordinate.charCodeAt(0) - 65; // Convert A-J to 0-9
     const startCol = parseInt(coordinate.slice(1)) - 1; // Convert 1-10 to 0-9
 
@@ -62,15 +62,24 @@ export class UI {
         cellCoordinate = `${String.fromCharCode(65 + startRow + i)}${startCol + 1}`;
       }
 
-      const cell = document.querySelector(
+      const compCell = document.querySelector(
         `.compCell[data-coordinate="${cellCoordinate}"]`
       );
-      if (cell) {
-        cell.classList.add('ship'); // Add a class to indicate a ship is present
+      const playerCell = document.querySelector(
+        `.playerCell[data-coordinate="${cellCoordinate}"]`
+      );
+
+      if (isPlayerBoard) {
+        if (playerCell) {
+          playerCell.classList.add('ship');
+        }
+      } else {
+        if (compCell) {
+          compCell.classList.add('ship');
+        }
       }
     }
   }
-
   updateUI(coordinate, result) {
     const cell = document.querySelector(
       `.compCell[data-coordinate="${coordinate}"]`
