@@ -105,8 +105,8 @@ export class gameboard {
     }
 
     const [_, isOccupied] = cell;
-    if (!isOccupied) {
-      this.board[row][col] = [coordinates, false, null];
+    if (isOccupied === false) {
+      this.board[row][col] = [coordinates, false, true]; // Set the 'isHit' flag to true for a miss
       this.missedHits.push(coordinates);
       return 'miss';
     } else {
@@ -124,7 +124,7 @@ export class gameboard {
       }
 
       parentShip.hit();
-      this.board[row][col][1] = false; // Set the cell to occupied = false after a hit
+      this.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
 
       if (parentShip.isSunk()) {
         parentShip.removeOccupiedCell(coordinate);

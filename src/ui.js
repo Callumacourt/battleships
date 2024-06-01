@@ -39,6 +39,7 @@ export class UI {
     const cells = document.querySelectorAll('.compCell');
     cells.forEach((cell) => {
       cell.addEventListener('click', () => {
+        console.log(this.gameboard);
         if (cell.dataset.clicked === 'true' || !isPlayerTurn) {
           return;
         }
@@ -89,6 +90,7 @@ export class UI {
       cell.textContent = 'x';
     } else if (result === 'sunk') {
       cell.classList.add('sunk');
+      cell.classList.add('hit');
     } else {
       cell.classList.add('hit');
       console.log('s');

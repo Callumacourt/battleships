@@ -11,7 +11,7 @@ export class Game {
     this.turn = 'player';
 
     this.ui = new UI(
-      this.playerBoard,
+      this.computerBoard,
       playerGridContainer,
       computerGridContainer
     );
@@ -32,11 +32,11 @@ export class Game {
 
     // Example ships with coordinates, sizes, and orientations for the player board
     const shipsToPlacePlayer = [
-      { coordinates: 'A1', size: 5, orientation: 'X' },
-      { coordinates: 'B1', size: 4, orientation: 'Y' },
-      { coordinates: 'D4', size: 3, orientation: 'X' },
-      { coordinates: 'E3', size: 3, orientation: 'X' },
-      { coordinates: 'D7', size: 2, orientation: 'Y' },
+      { coordinates: 'F1', size: 5, orientation: 'X' },
+      { coordinates: 'B1', size: 4, orientation: 'X' },
+      { coordinates: 'C1', size: 3, orientation: 'X' },
+      { coordinates: 'D1', size: 3, orientation: 'X' },
+      { coordinates: 'E1', size: 2, orientation: 'X' },
     ];
 
     shipsToPlaceComputer.forEach((ship) => {
@@ -62,6 +62,7 @@ export class Game {
           orientation.toUpperCase()
         );
         this.ui.updateShipOnUI(coordinates, size, orientation, true); // Pass `true` to indicate it's the player board
+        console.log(this.computerBoard);
       } catch (error) {
         console.error(`Failed to place ship: ${error.message}`);
       }
