@@ -1,3 +1,4 @@
+import { handleAttackError } from './validate';
 import { gameboard } from './gameboard';
 import { UI } from './ui';
 
@@ -18,7 +19,6 @@ export class Game {
   }
 
   placeShips() {
-    // Example ships with coordinates, sizes, and orientations for the computer board
     const shipsToPlaceComputer = [
       { coordinates: 'A1', size: 5, orientation: 'X' },
       { coordinates: 'B1', size: 4, orientation: 'X' },
@@ -27,7 +27,6 @@ export class Game {
       { coordinates: 'E1', size: 2, orientation: 'X' },
     ];
 
-    // Example ships with coordinates, sizes, and orientations for the player board
     const shipsToPlacePlayer = [
       { coordinates: 'F1', size: 5, orientation: 'X' },
       { coordinates: 'B1', size: 4, orientation: 'X' },
@@ -66,16 +65,7 @@ export class Game {
   }
 
   receiveAttack(board, coordinates) {
-    const coordUpper = coordinates.toUpperCase();
-    if (!board.coordinateMap[coordUpper]) {
-      throw new Error(`Invalid coordinate: ${coordinates}`);
-    }
-
-    const [row, col] = board.coordinateMap[coordUpper];
-    const cell = board.board[row][col];
-    if (!cell) {
-      throw new Error(`Invalid cell: [${row}, ${col}]`);
-    }
+    const { row, col, cell } = handleAttackError(board, coordinates);
 
     const [_, isOccupied] = cell;
     if (!isOccupied) {
@@ -97,14 +87,13 @@ export class Game {
       }
 
       parentShip.hit();
-      this.isGameOver(board, this.playerBoard);
       board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
 
       if (parentShip.isSunk()) {
         parentShip.removeOccupiedCell(coordinate);
         if (parentShip.occupiedCells.length === 0) {
           board.ships = board.ships.filter((ship) => ship !== parentShip);
-          this.isGameOver(board, this.playerBoard);
+          this.isGameOver();
         }
         return 'sunk';
       }
@@ -113,10 +102,11 @@ export class Game {
       return 'hit';
     }
   }
-  isGameOver(computerBoard, playerBoard) {
-    if (computerBoard.ships.length === 0) {
+
+  isGameOver() {
+    if (this.computerBoard.ships.length === 0) {
       this.ui.showWinner('player');
-    } else if (playerBoard.ships.length === 0) {
+    } else if (this.playerBoard.ships.length === 0) {
       this.ui.showWinner('computer');
     }
   }
