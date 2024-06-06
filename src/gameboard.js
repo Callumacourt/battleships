@@ -80,18 +80,5 @@ export class gameboard {
         this.occupyCell(currentCoordinate, ship);
       }
     }
-
-    this.gameStarted = true;
-  }
-
-  isGameOver() {
-    // Check if all ships have been sunk
-    const allShipsSunk = this.ships.every((ship) => ship.isSunk());
-
-    if (this.gameStarted === true && allShipsSunk) {
-      return true; // Game is over
-    } else {
-      return false; // Game is still ongoing
-    }
   }
 }

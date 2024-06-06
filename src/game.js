@@ -1,9 +1,6 @@
 import { gameboard } from './gameboard';
 import { UI } from './ui';
 
-const playerGridContainer = document.querySelector('.playerGridContainer');
-const computerGridContainer = document.querySelector('.computerGridContainer');
-
 export class Game {
   constructor() {
     this.playerBoard = new gameboard();
@@ -100,13 +97,14 @@ export class Game {
       }
 
       parentShip.hit();
+      this.isGameOver(board, this.playerBoard);
       board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
 
       if (parentShip.isSunk()) {
         parentShip.removeOccupiedCell(coordinate);
         if (parentShip.occupiedCells.length === 0) {
           board.ships = board.ships.filter((ship) => ship !== parentShip);
-          //  this.isGameOver();
+          this.isGameOver(board, this.playerBoard);
         }
         return 'sunk';
       }
@@ -114,5 +112,12 @@ export class Game {
       parentShip.removeOccupiedCell(coordinate);
       return 'hit';
     }
+  }
+  isGameOver(computerBoard, playerBoard) {
+    if (computerBoard.ships.length === 0) {
+      console.log('player wins');
+    } else if (playerBoard.ships.length === 0) {
+      console.log('computer wins');
+    } else console.log('not over');
   }
 }
