@@ -67,40 +67,47 @@ export class Game {
   receiveAttack(board, coordinates) {
     const { row, col, cell } = handleAttackError(board, coordinates);
 
-    const [_, isOccupied] = cell;
-    if (!isOccupied) {
-      board.board[row][col] = [coordinates, false, true]; // Set the 'isHit' flag to true for a miss
-      board.missedHits.push(coordinates);
-      return 'miss';
+    if (!cell[1]) {
+      return this.handleMiss(board, coordinates, row, col);
     } else {
       const coordinate = board.board[row][col];
-      let parentShip;
-      for (const ship of board.ships) {
-        if (ship.occupiedCells.includes(coordinate)) {
-          parentShip = ship;
-          break;
-        }
-      }
+      const parentShip = this.findParentShip(board, coordinate);
 
-      if (!parentShip) {
-        throw new Error('Parent ship not found');
-      }
+      this.handleHit(parentShip, board, coordinate, row, col);
 
-      parentShip.hit();
-      board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
-
-      if (parentShip.isSunk()) {
-        parentShip.removeOccupiedCell(coordinate);
-        if (parentShip.occupiedCells.length === 0) {
-          board.ships = board.ships.filter((ship) => ship !== parentShip);
-          this.isGameOver();
-        }
-        return 'sunk';
-      }
-
-      parentShip.removeOccupiedCell(coordinate);
-      return 'hit';
+      return parentShip.isSunk() ? this.handleSunk(parentShip, board) : 'hit';
     }
+  }
+
+  handleMiss(board, coordinates, row, col) {
+    board.board[row][col] = [coordinates, false, true]; // Set the 'isHit' flag to true for a miss
+    board.missedHits.push(coordinates);
+    return 'miss';
+  }
+
+  findParentShip(board, coordinate) {
+    for (const ship of board.ships) {
+      if (ship.occupiedCells.includes(coordinate)) {
+        return ship;
+      }
+    }
+    throw new Error('Parent ship not found');
+  }
+
+  handleHit(parentShip, board, coordinate, row, col) {
+    parentShip.hit();
+    board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
+    parentShip.removeOccupiedCell(coordinate);
+  }
+
+  handleSunk(parentShip, board) {
+    parentShip.occupiedCells.forEach((coordinate) => {
+      parentShip.removeOccupiedCell(coordinate);
+    });
+
+    board.ships = board.ships.filter((ship) => ship !== parentShip);
+    this.isGameOver();
+    return 'sunk';
   }
 
   isGameOver() {
