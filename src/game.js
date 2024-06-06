@@ -115,9 +115,9 @@ export class Game {
   }
   isGameOver(computerBoard, playerBoard) {
     if (computerBoard.ships.length === 0) {
-      console.log('player wins');
+      this.ui.showWinner('player');
     } else if (playerBoard.ships.length === 0) {
-      console.log('computer wins');
-    } else console.log('not over');
+      this.ui.showWinner('computer');
+    }
   }
 }

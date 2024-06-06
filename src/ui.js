@@ -95,10 +95,11 @@ export class UI {
     }
   }
 
-  showGameOver(winner) {
+  showWinner(winner) {
     const body = document.querySelector('.body');
     const gameOverDiv = document.createElement('div');
-    gameOverDiv.innerHTML = 'Game over, winner is' + `${winner}`;
+    gameOverDiv.classList.add('gameOverContainer');
+    gameOverDiv.innerHTML = 'Game over, ' + `${winner}` + ' wins';
     body.appendChild(gameOverDiv);
   }
 }
