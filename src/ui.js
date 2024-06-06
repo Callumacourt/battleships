@@ -2,7 +2,6 @@ export class UI {
   constructor(gameboard) {
     this.gameboard = gameboard;
     this.createGameboard();
-    this.bindEventListeners();
   }
 
   createGameboard() {
@@ -35,16 +34,15 @@ export class UI {
     }
   }
 
-  bindEventListeners(isPlayerTurn) {
+  bindEventListeners(isPlayerTurn, receiveAttackFn) {
     const cells = document.querySelectorAll('.compCell');
     cells.forEach((cell) => {
       cell.addEventListener('click', () => {
-        console.log(this.gameboard);
         if (cell.dataset.clicked === 'true' || !isPlayerTurn) {
           return;
         }
         const coordinate = cell.dataset.coordinate;
-        const result = this.gameboard.receiveAttack(coordinate);
+        const result = receiveAttackFn(coordinate); // Pass the coordinate argument
         this.updateUI(coordinate, result);
         cell.dataset.clicked = 'true';
       });
@@ -81,6 +79,7 @@ export class UI {
       }
     }
   }
+
   updateUI(coordinate, result) {
     const cell = document.querySelector(
       `.compCell[data-coordinate="${coordinate}"]`
@@ -93,7 +92,13 @@ export class UI {
       cell.classList.add('hit');
     } else {
       cell.classList.add('hit');
-      console.log('s');
     }
+  }
+
+  showGameOver(winner) {
+    const body = document.querySelector('.body');
+    const gameOverDiv = document.createElement('div');
+    gameOverDiv.innerHTML = 'Game over, winner is' + `${winner}`;
+    body.appendChild(gameOverDiv);
   }
 }
