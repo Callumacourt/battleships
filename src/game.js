@@ -1,3 +1,4 @@
+import { handleAttackError } from './validate';
 import { gameboard } from './gameboard';
 import { UI } from './ui';
 
@@ -5,7 +6,7 @@ export class Game {
   constructor() {
     this.playerBoard = new gameboard();
     this.computerBoard = new gameboard();
-    this.turn = 'player';
+    this.turn = 'player'; // Initialize the turn to 'player'
     this.playerWins = 0;
     this.computerWins = 0;
 
@@ -13,12 +14,11 @@ export class Game {
     this.placeShips();
     this.ui.bindEventListeners(
       this.turn === 'player',
-      this.receiveAttack.bind(this, this.computerBoard)
+      this.playerReceiveAttack.bind(this) // Separate player attack handler
     );
   }
 
   placeShips() {
-    // Example ships with coordinates, sizes, and orientations for the computer board
     const shipsToPlaceComputer = [
       { coordinates: 'A1', size: 5, orientation: 'X' },
       { coordinates: 'B1', size: 4, orientation: 'X' },
@@ -27,7 +27,6 @@ export class Game {
       { coordinates: 'E1', size: 2, orientation: 'X' },
     ];
 
-    // Example ships with coordinates, sizes, and orientations for the player board
     const shipsToPlacePlayer = [
       { coordinates: 'F1', size: 5, orientation: 'X' },
       { coordinates: 'B1', size: 4, orientation: 'X' },
@@ -65,59 +64,100 @@ export class Game {
     });
   }
 
+  playerReceiveAttack(coordinates) {
+    if (this.turn !== 'player') return; // Prevent player from attacking out of turn
+    const result = this.receiveAttack(this.computerBoard, coordinates);
+    this.ui.updateUI(coordinates, result, false);
+    this.turn = 'computer'; // Switch turn to computer
+    this.checkGameOver();
+    if (this.turn === 'computer') {
+      setTimeout(() => this.computerAttack(), 1500); // Delay before computer attacks
+    }
+  }
+
   receiveAttack(board, coordinates) {
-    const coordUpper = coordinates.toUpperCase();
-    if (!board.coordinateMap[coordUpper]) {
-      throw new Error(`Invalid coordinate: ${coordinates}`);
-    }
+    const { row, col, cell } = handleAttackError(board, coordinates);
+    const isPlayerBoard = board === this.playerBoard;
 
-    const [row, col] = board.coordinateMap[coordUpper];
-    const cell = board.board[row][col];
-    if (!cell) {
-      throw new Error(`Invalid cell: [${row}, ${col}]`);
-    }
-
-    const [_, isOccupied] = cell;
-    if (!isOccupied) {
-      board.board[row][col] = [coordinates, false, true]; // Set the 'isHit' flag to true for a miss
-      board.missedHits.push(coordinates);
-      return 'miss';
+    if (!cell[1]) {
+      const result = this.handleMiss(board, coordinates, row, col);
+      return result;
     } else {
       const coordinate = board.board[row][col];
-      let parentShip;
-      for (const ship of board.ships) {
-        if (ship.occupiedCells.includes(coordinate)) {
-          parentShip = ship;
-          break;
-        }
+      const parentShip = this.findParentShip(board, coordinate);
+
+      const result = this.handleHit(parentShip, board, coordinate, row, col);
+      board.hitCells.push(coordinates);
+
+      if (result === 'sunk') {
+        this.handleSunk(parentShip, board);
       }
 
-      if (!parentShip) {
-        throw new Error('Parent ship not found');
-      }
-
-      parentShip.hit();
-      this.isGameOver(board, this.playerBoard);
-      board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
-
-      if (parentShip.isSunk()) {
-        parentShip.removeOccupiedCell(coordinate);
-        if (parentShip.occupiedCells.length === 0) {
-          board.ships = board.ships.filter((ship) => ship !== parentShip);
-          this.isGameOver(board, this.playerBoard);
-        }
-        return 'sunk';
-      }
-
-      parentShip.removeOccupiedCell(coordinate);
       return 'hit';
     }
   }
-  isGameOver(computerBoard, playerBoard) {
-    if (computerBoard.ships.length === 0) {
+
+  handleMiss(board, coordinates, row, col) {
+    board.board[row][col] = [coordinates, false, true]; // Set the 'isHit' flag to true for a miss
+    board.missedHits.push(coordinates);
+    return 'miss';
+  }
+
+  findParentShip(board, coordinate) {
+    for (const ship of board.ships) {
+      if (ship.occupiedCells.includes(coordinate)) {
+        return ship;
+      }
+    }
+    throw new Error('Parent ship not found');
+  }
+
+  handleHit(parentShip, board, coordinate, row, col) {
+    parentShip.hit();
+    board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
+    parentShip.removeOccupiedCell(coordinate);
+    return 'hit';
+  }
+
+  handleSunk(parentShip, board) {
+    parentShip.occupiedCells.forEach((coordinate) => {
+      parentShip.removeOccupiedCell(coordinate);
+    });
+
+    board.ships = board.ships.filter((ship) => ship !== parentShip);
+    this.isGameOver();
+  }
+
+  async computerAttack() {
+    if (this.turn !== 'computer') return; // Prevent computer from attacking out of turn
+
+    const generateCoordinate = (board) => {
+      const availableCells = [];
+      for (const coordinate in board.coordinateMap) {
+        if (!board.hitCells.includes(coordinate)) {
+          availableCells.push(coordinate);
+        }
+      }
+      const randomIndex = Math.floor(Math.random() * availableCells.length);
+      return availableCells[randomIndex];
+    };
+
+    const coordinate = generateCoordinate(this.playerBoard);
+    const result = this.receiveAttack(this.playerBoard, coordinate);
+    this.ui.updateUI(coordinate, result, true);
+    this.turn = 'player'; // Switch turn to player
+    this.checkGameOver();
+  }
+
+  checkGameOver() {
+    if (this.computerBoard.ships.length === 0) {
       this.ui.showWinner('player');
-    } else if (playerBoard.ships.length === 0) {
+    } else if (this.playerBoard.ships.length === 0) {
       this.ui.showWinner('computer');
     }
+  }
+
+  waitForDelay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

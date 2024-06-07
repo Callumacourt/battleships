@@ -34,3 +34,17 @@ export function validateXBoundary(col, columns) {
     throw new Error('Out of boundaries');
   }
 }
+export function handleAttackError(board, coordinates) {
+  const coordUpper = coordinates.toUpperCase();
+  if (!board.coordinateMap[coordUpper]) {
+    throw new Error(`Invalid coordinate: ${coordinates}`);
+  }
+
+  const [row, col] = board.coordinateMap[coordUpper];
+  const cell = board.board[row][col];
+  if (!cell) {
+    throw new Error(`Invalid cell: [${row}, ${col}]`);
+  }
+
+  return { row, col, cell };
+}
