@@ -13,6 +13,7 @@ export class gameboard {
     this.board = [];
     this.coordinateMap = [];
     this.ships = [];
+    this.hitCells = [];
     this.createGameboard();
     this.missedHits = [];
     this.gameStarted = false;

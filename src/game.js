@@ -74,6 +74,7 @@ export class Game {
       const parentShip = this.findParentShip(board, coordinate);
 
       this.handleHit(parentShip, board, coordinate, row, col);
+      board.hitCells.push(coordinates);
 
       return parentShip.isSunk() ? this.handleSunk(parentShip, board) : 'hit';
     }
