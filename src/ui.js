@@ -13,23 +13,19 @@ export class UI {
     for (let row = 0; row < 10; row++) {
       for (let col = 0; col < 10; col++) {
         // Create cell for player grid
-        const cell = document.createElement('div');
-        cell.classList.add('playerCell');
+        const playerCell = document.createElement('div');
+        playerCell.classList.add('playerCell');
         const coordinate = `${String.fromCharCode(65 + row)}${col + 1}`;
-        cell.dataset.coordinate = coordinate;
-        cell.dataset.clicked = false;
-        playerGridContainer.appendChild(cell);
-      }
-    }
+        playerCell.dataset.coordinate = coordinate;
+        playerCell.dataset.clicked = false;
+        playerGridContainer.appendChild(playerCell);
 
-    for (let row = 0; row < 10; row++) {
-      for (let col = 0; col < 10; col++) {
         // Create cell for computer grid
-        const cell = document.createElement('div');
-        cell.classList.add('compCell');
-        const coordinate = `${String.fromCharCode(65 + row)}${col + 1}`;
-        cell.dataset.coordinate = coordinate;
-        computerGridContainer.appendChild(cell);
+        const computerCell = document.createElement('div');
+        computerCell.classList.add('compCell');
+        computerCell.dataset.coordinate = coordinate;
+        computerCell.dataset.clicked = false;
+        computerGridContainer.appendChild(computerCell);
       }
     }
   }
@@ -42,8 +38,7 @@ export class UI {
           return;
         }
         const coordinate = cell.dataset.coordinate;
-        const result = receiveAttackFn(coordinate); // Pass the coordinate argument
-        this.updateUI(coordinate, result);
+        receiveAttackFn(coordinate); // Pass the coordinate argument
         cell.dataset.clicked = 'true';
       });
     });
@@ -61,37 +56,33 @@ export class UI {
         cellCoordinate = `${String.fromCharCode(65 + startRow + i)}${startCol + 1}`;
       }
 
-      const compCell = document.querySelector(
-        `.compCell[data-coordinate="${cellCoordinate}"]`
-      );
-      const playerCell = document.querySelector(
-        `.playerCell[data-coordinate="${cellCoordinate}"]`
+      const cellSelector = isPlayerBoard ? '.playerCell' : '.compCell';
+      const cell = document.querySelector(
+        `${cellSelector}[data-coordinate="${cellCoordinate}"]`
       );
 
-      if (isPlayerBoard) {
-        if (playerCell) {
-          playerCell.classList.add('ship');
-        }
-      } else {
-        if (compCell) {
-          compCell.classList.add('ship');
-        }
+      if (cell) {
+        cell.classList.add('ship');
       }
     }
   }
 
-  updateUI(coordinate, result) {
+  updateUI(coordinate, result, isPlayerBoard) {
+    const cellSelector = isPlayerBoard ? '.playerCell' : '.compCell';
     const cell = document.querySelector(
-      `.compCell[data-coordinate="${coordinate}"]`
+      `${cellSelector}[data-coordinate="${coordinate}"]`
     );
-    if (result === 'miss') {
-      cell.classList.add('missed');
-      cell.textContent = 'x';
-    } else if (result === 'sunk') {
-      cell.classList.add('sunk');
-      cell.classList.add('hit');
-    } else {
-      cell.classList.add('hit');
+
+    if (cell) {
+      if (result === 'miss') {
+        cell.classList.add('missed');
+        cell.textContent = 'x';
+      } else if (result === 'sunk') {
+        cell.classList.add('sunk');
+        cell.classList.add('hit');
+      } else {
+        cell.classList.add('hit');
+      }
     }
   }
 

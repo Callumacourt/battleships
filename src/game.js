@@ -6,7 +6,7 @@ export class Game {
   constructor() {
     this.playerBoard = new gameboard();
     this.computerBoard = new gameboard();
-    this.turn = 'player';
+    this.turn = 'player'; // Initialize the turn to 'player'
     this.playerWins = 0;
     this.computerWins = 0;
 
@@ -14,7 +14,7 @@ export class Game {
     this.placeShips();
     this.ui.bindEventListeners(
       this.turn === 'player',
-      this.receiveAttack.bind(this, this.computerBoard)
+      this.playerReceiveAttack.bind(this) // Separate player attack handler
     );
   }
 
@@ -64,19 +64,36 @@ export class Game {
     });
   }
 
+  playerReceiveAttack(coordinates) {
+    if (this.turn !== 'player') return; // Prevent player from attacking out of turn
+    const result = this.receiveAttack(this.computerBoard, coordinates);
+    this.ui.updateUI(coordinates, result, false);
+    this.turn = 'computer'; // Switch turn to computer
+    this.checkGameOver();
+    if (this.turn === 'computer') {
+      setTimeout(() => this.computerAttack(), 1500); // Delay before computer attacks
+    }
+  }
+
   receiveAttack(board, coordinates) {
     const { row, col, cell } = handleAttackError(board, coordinates);
+    const isPlayerBoard = board === this.playerBoard;
 
     if (!cell[1]) {
-      return this.handleMiss(board, coordinates, row, col);
+      const result = this.handleMiss(board, coordinates, row, col);
+      return result;
     } else {
       const coordinate = board.board[row][col];
       const parentShip = this.findParentShip(board, coordinate);
 
-      this.handleHit(parentShip, board, coordinate, row, col);
+      const result = this.handleHit(parentShip, board, coordinate, row, col);
       board.hitCells.push(coordinates);
 
-      return parentShip.isSunk() ? this.handleSunk(parentShip, board) : 'hit';
+      if (result === 'sunk') {
+        this.handleSunk(parentShip, board);
+      }
+
+      return 'hit';
     }
   }
 
@@ -99,6 +116,7 @@ export class Game {
     parentShip.hit();
     board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
     parentShip.removeOccupiedCell(coordinate);
+    return 'hit';
   }
 
   handleSunk(parentShip, board) {
@@ -108,14 +126,38 @@ export class Game {
 
     board.ships = board.ships.filter((ship) => ship !== parentShip);
     this.isGameOver();
-    return 'sunk';
   }
 
-  isGameOver() {
+  async computerAttack() {
+    if (this.turn !== 'computer') return; // Prevent computer from attacking out of turn
+
+    const generateCoordinate = (board) => {
+      const availableCells = [];
+      for (const coordinate in board.coordinateMap) {
+        if (!board.hitCells.includes(coordinate)) {
+          availableCells.push(coordinate);
+        }
+      }
+      const randomIndex = Math.floor(Math.random() * availableCells.length);
+      return availableCells[randomIndex];
+    };
+
+    const coordinate = generateCoordinate(this.playerBoard);
+    const result = this.receiveAttack(this.playerBoard, coordinate);
+    this.ui.updateUI(coordinate, result, true);
+    this.turn = 'player'; // Switch turn to player
+    this.checkGameOver();
+  }
+
+  checkGameOver() {
     if (this.computerBoard.ships.length === 0) {
       this.ui.showWinner('player');
     } else if (this.playerBoard.ships.length === 0) {
       this.ui.showWinner('computer');
     }
+  }
+
+  waitForDelay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
