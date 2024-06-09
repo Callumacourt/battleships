@@ -9,6 +9,7 @@ export class Game {
     this.turn = 'player'; // Initialize the turn to 'player'
     this.playerWins = 0;
     this.computerWins = 0;
+    this.gameOver = false;
 
     this.ui = new UI(this.computerBoard);
     this.placeShips();
@@ -65,19 +66,18 @@ export class Game {
   }
 
   playerReceiveAttack(coordinates) {
-    if (this.turn !== 'player') return; // Prevent player from attacking out of turn
+    if (this.turn !== 'player' || this.gameOver === true) return; // Prevent player from attacking out of turn
     const result = this.receiveAttack(this.computerBoard, coordinates);
     this.ui.updateUI(coordinates, result, false);
-    this.turn = 'computer'; // Switch turn to computer
     this.checkGameOver();
-    if (this.turn === 'computer') {
-      setTimeout(() => this.computerAttack(), 1500); // Delay before computer attacks
+    if (!this.gameOver) {
+      this.turn = 'computer'; // Switch turn to computer
+      setTimeout(() => this.computerAttack(), 800); // Delay before computer attacks
     }
   }
 
   receiveAttack(board, coordinates) {
     const { row, col, cell } = handleAttackError(board, coordinates);
-    const isPlayerBoard = board === this.playerBoard;
 
     if (!cell[1]) {
       const result = this.handleMiss(board, coordinates, row, col);
@@ -114,8 +114,14 @@ export class Game {
 
   handleHit(parentShip, board, coordinate, row, col) {
     parentShip.hit();
+    console.log(parentShip.occupiedCells.length);
+
     board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
     parentShip.removeOccupiedCell(coordinate);
+    if (parentShip.occupiedCells.length === 0) {
+      this.handleSunk(parentShip, board);
+    }
+
     return 'hit';
   }
 
@@ -125,7 +131,7 @@ export class Game {
     });
 
     board.ships = board.ships.filter((ship) => ship !== parentShip);
-    this.isGameOver();
+    // Remove checkGameOver call from here
   }
 
   async computerAttack() {
@@ -144,16 +150,21 @@ export class Game {
 
     const coordinate = generateCoordinate(this.playerBoard);
     const result = this.receiveAttack(this.playerBoard, coordinate);
+
     this.ui.updateUI(coordinate, result, true);
-    this.turn = 'player'; // Switch turn to player
     this.checkGameOver();
+    if (!this.gameOver) {
+      this.turn = 'player'; // Switch turn to player
+    }
   }
 
   checkGameOver() {
     if (this.computerBoard.ships.length === 0) {
       this.ui.showWinner('player');
+      this.gameOver = true;
     } else if (this.playerBoard.ships.length === 0) {
       this.ui.showWinner('computer');
+      this.gameOver = true;
     }
   }
 
