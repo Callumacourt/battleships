@@ -34,7 +34,11 @@ export class UI {
     const cells = document.querySelectorAll('.compCell');
     cells.forEach((cell) => {
       cell.addEventListener('click', () => {
-        if (cell.dataset.clicked === 'true' || !isPlayerTurn) {
+        if (
+          cell.classList.contains('hit') ||
+          cell.classList.contains('missed') ||
+          !isPlayerTurn
+        ) {
           return;
         }
         const coordinate = cell.dataset.coordinate;
