@@ -9,6 +9,8 @@ export class Game {
     this.turn = 'player'; // Initialize the turn to 'player'
     this.playerWins = 0;
     this.computerWins = 0;
+    this.gameOver = false;
+    this.computerHits = [];
 
     this.ui = new UI(this.computerBoard);
     this.placeShips();
@@ -65,19 +67,18 @@ export class Game {
   }
 
   playerReceiveAttack(coordinates) {
-    if (this.turn !== 'player') return; // Prevent player from attacking out of turn
+    if (this.turn !== 'player' || this.gameOver === true) return; // Prevent player from attacking out of turn
     const result = this.receiveAttack(this.computerBoard, coordinates);
     this.ui.updateUI(coordinates, result, false);
-    this.turn = 'computer'; // Switch turn to computer
     this.checkGameOver();
-    if (this.turn === 'computer') {
-      setTimeout(() => this.computerAttack(), 1500); // Delay before computer attacks
+    if (!this.gameOver) {
+      this.turn = 'computer'; // Switch turn to computer
+      setTimeout(() => this.computerAttack(), 800); // Delay before computer attacks
     }
   }
 
   receiveAttack(board, coordinates) {
     const { row, col, cell } = handleAttackError(board, coordinates);
-    const isPlayerBoard = board === this.playerBoard;
 
     if (!cell[1]) {
       const result = this.handleMiss(board, coordinates, row, col);
@@ -114,8 +115,13 @@ export class Game {
 
   handleHit(parentShip, board, coordinate, row, col) {
     parentShip.hit();
+
     board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
     parentShip.removeOccupiedCell(coordinate);
+    if (parentShip.occupiedCells.length === 0) {
+      this.handleSunk(parentShip, board);
+    }
+
     return 'hit';
   }
 
@@ -125,10 +131,11 @@ export class Game {
     });
 
     board.ships = board.ships.filter((ship) => ship !== parentShip);
-    this.isGameOver();
+    // Remove checkGameOver call from here
   }
 
   async computerAttack() {
+    let nextAttack;
     if (this.turn !== 'computer') return; // Prevent computer from attacking out of turn
 
     const generateCoordinate = (board) => {
@@ -144,16 +151,77 @@ export class Game {
 
     const coordinate = generateCoordinate(this.playerBoard);
     const result = this.receiveAttack(this.playerBoard, coordinate);
+
     this.ui.updateUI(coordinate, result, true);
-    this.turn = 'player'; // Switch turn to player
+    this.getAdjacentCells(coordinate, this.playerBoard);
+    this.getNextAttack(coordinate, this.playerBoard);
     this.checkGameOver();
+    if (!this.gameOver) {
+      this.turn = 'player';
+    }
+  }
+
+  getAdjacentCells(coordinate, board) {
+    const directions = [
+      { row: 0, col: 1 }, // right
+      { row: 0, col: -1 }, // left
+      { row: 1, col: 0 }, // down
+      { row: -1, col: 0 }, // up
+    ];
+
+    const rows = 'ABCDEFGHIJ';
+    const cols = '123456789';
+
+    const currentRow = coordinate[0];
+    const currentCol = coordinate.slice(1);
+
+    const coordinateMap = board.coordinateMap;
+
+    const adjacentCells = [];
+
+    directions.forEach((direction) => {
+      const newRow = rows[rows.indexOf(currentRow) + direction.row];
+      const newCol = (parseInt(currentCol) + direction.col).toString();
+
+      if (newRow && cols.includes(newCol)) {
+        const newCoordinate = newRow + newCol;
+
+        if (coordinateMap.hasOwnProperty(newCoordinate)) {
+          adjacentCells.push(newCoordinate);
+        }
+      }
+    });
+
+    return adjacentCells;
+  }
+
+  getNextAttack(coordinate, board) {
+    const adjacentCells = this.getAdjacentCells(coordinate, board);
+
+    const availableCells = [];
+
+    for (const coordinate in board.coordinateMap) {
+      if (!board.hitCells.includes(coordinate)) {
+        availableCells.push(coordinate);
+      }
+    }
+
+    const validAdjacentCells = availableCells.filter((cell) =>
+      adjacentCells.includes(cell)
+    );
+
+    const randomIndex = Math.floor(Math.random() * validAdjacentCells.length);
+    const nextAttack = validAdjacentCells[randomIndex];
+    console.log(nextAttack);
   }
 
   checkGameOver() {
     if (this.computerBoard.ships.length === 0) {
       this.ui.showWinner('player');
+      this.gameOver = true;
     } else if (this.playerBoard.ships.length === 0) {
       this.ui.showWinner('computer');
+      this.gameOver = true;
     }
   }
 
