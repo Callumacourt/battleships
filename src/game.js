@@ -10,6 +10,7 @@ export class Game {
     this.playerWins = 0;
     this.computerWins = 0;
     this.gameOver = false;
+    this.computerHits = [];
 
     this.ui = new UI(this.computerBoard);
     this.placeShips();
@@ -114,7 +115,6 @@ export class Game {
 
   handleHit(parentShip, board, coordinate, row, col) {
     parentShip.hit();
-    console.log(parentShip.occupiedCells.length);
 
     board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
     parentShip.removeOccupiedCell(coordinate);
@@ -135,6 +135,7 @@ export class Game {
   }
 
   async computerAttack() {
+    let nextAttack;
     if (this.turn !== 'computer') return; // Prevent computer from attacking out of turn
 
     const generateCoordinate = (board) => {
@@ -152,10 +153,45 @@ export class Game {
     const result = this.receiveAttack(this.playerBoard, coordinate);
 
     this.ui.updateUI(coordinate, result, true);
+    this.getAdjacentCells(coordinate, this.playerBoard);
     this.checkGameOver();
     if (!this.gameOver) {
-      this.turn = 'player'; // Switch turn to player
+      this.turn = 'player';
     }
+  }
+
+  getAdjacentCells(coordinate, board) {
+    const directions = [
+      { row: 0, col: 1 }, // right
+      { row: 0, col: -1 }, // left
+      { row: 1, col: 0 }, // down
+      { row: -1, col: 0 }, // up
+    ];
+
+    const rows = 'ABCDEFGHIJ';
+    const cols = '123456789';
+
+    const currentRow = coordinate[0];
+    const currentCol = coordinate.slice(1);
+
+    const coordinateMap = board.coordinateMap;
+
+    const adjacentCells = [];
+
+    directions.forEach((direction) => {
+      const newRow = rows[rows.indexOf(currentRow) + direction.row];
+      const newCol = (parseInt(currentCol) + direction.col).toString();
+
+      if (newRow && cols.includes(newCol)) {
+        const newCoordinate = newRow + newCol;
+
+        if (coordinateMap.hasOwnProperty(newCoordinate)) {
+          adjacentCells.push(newCoordinate);
+        }
+      }
+    });
+
+    return adjacentCells;
   }
 
   checkGameOver() {
