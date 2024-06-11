@@ -154,6 +154,7 @@ export class Game {
 
     this.ui.updateUI(coordinate, result, true);
     this.getAdjacentCells(coordinate, this.playerBoard);
+    this.getNextAttack(coordinate, this.playerBoard);
     this.checkGameOver();
     if (!this.gameOver) {
       this.turn = 'player';
@@ -192,6 +193,26 @@ export class Game {
     });
 
     return adjacentCells;
+  }
+
+  getNextAttack(coordinate, board) {
+    const adjacentCells = this.getAdjacentCells(coordinate, board);
+
+    const availableCells = [];
+
+    for (const coordinate in board.coordinateMap) {
+      if (!board.hitCells.includes(coordinate)) {
+        availableCells.push(coordinate);
+      }
+    }
+
+    const validAdjacentCells = availableCells.filter((cell) =>
+      adjacentCells.includes(cell)
+    );
+
+    const randomIndex = Math.floor(Math.random() * validAdjacentCells.length);
+    const nextAttack = validAdjacentCells[randomIndex];
+    console.log(nextAttack);
   }
 
   checkGameOver() {
