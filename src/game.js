@@ -10,7 +10,8 @@ export class Game {
     this.playerWins = 0;
     this.computerWins = 0;
     this.gameOver = false;
-    this.computerHits = [];
+    this.prevCompHit = [];
+    this.nextCompAttack = undefined;
 
     this.ui = new UI(this.computerBoard);
     this.placeShips();
@@ -30,7 +31,7 @@ export class Game {
     ];
 
     const shipsToPlacePlayer = [
-      { coordinates: 'F1', size: 5, orientation: 'X' },
+      { coordinates: 'A1', size: 5, orientation: 'X' },
       { coordinates: 'B1', size: 4, orientation: 'X' },
       { coordinates: 'C1', size: 3, orientation: 'X' },
       { coordinates: 'D1', size: 3, orientation: 'X' },
@@ -131,30 +132,43 @@ export class Game {
     });
 
     board.ships = board.ships.filter((ship) => ship !== parentShip);
-    // Remove checkGameOver call from here
+  }
+
+  generateCoordinate(board) {
+    const availableCells = [];
+    for (const coordinate in board.coordinateMap) {
+      if (!board.hitCells.includes(coordinate)) {
+        availableCells.push(coordinate);
+      }
+    }
+    const randomIndex = Math.floor(Math.random() * availableCells.length);
+    return availableCells[randomIndex];
   }
 
   async computerAttack() {
-    let nextAttack;
     if (this.turn !== 'computer') return; // Prevent computer from attacking out of turn
 
-    const generateCoordinate = (board) => {
-      const availableCells = [];
-      for (const coordinate in board.coordinateMap) {
-        if (!board.hitCells.includes(coordinate)) {
-          availableCells.push(coordinate);
-        }
-      }
-      const randomIndex = Math.floor(Math.random() * availableCells.length);
-      return availableCells[randomIndex];
-    };
+    let result;
 
-    const coordinate = generateCoordinate(this.playerBoard);
-    const result = this.receiveAttack(this.playerBoard, coordinate);
+    const coordinate = this.generateCoordinate(this.playerBoard);
+
+    if (this.nextCompAttack === undefined) {
+      console.log('undefined');
+      result = this.receiveAttack(this.playerBoard, coordinate);
+    } else {
+      console.log('defined');
+    }
 
     this.ui.updateUI(coordinate, result, true);
-    this.getAdjacentCells(coordinate, this.playerBoard);
-    this.getNextAttack(coordinate, this.playerBoard);
+
+    if (result === 'hit') {
+      this.prevCompHit.push(coordinate);
+      this.nextCompAttack = this.getNextAttack(coordinate, this.playerBoard);
+      console.log(this.nextCompAttack);
+
+      //if those hit, continue in that direction
+    }
+
     this.checkGameOver();
     if (!this.gameOver) {
       this.turn = 'player';
@@ -186,7 +200,10 @@ export class Game {
       if (newRow && cols.includes(newCol)) {
         const newCoordinate = newRow + newCol;
 
-        if (coordinateMap.hasOwnProperty(newCoordinate)) {
+        if (
+          coordinateMap.hasOwnProperty(newCoordinate) &&
+          !board.hitCells.includes(newCoordinate)
+        ) {
           adjacentCells.push(newCoordinate);
         }
       }
@@ -198,21 +215,50 @@ export class Game {
   getNextAttack(coordinate, board) {
     const adjacentCells = this.getAdjacentCells(coordinate, board);
 
-    const availableCells = [];
-
-    for (const coordinate in board.coordinateMap) {
-      if (!board.hitCells.includes(coordinate)) {
-        availableCells.push(coordinate);
-      }
-    }
-
-    const validAdjacentCells = availableCells.filter((cell) =>
-      adjacentCells.includes(cell)
+    // Filter out cells that have already been hit
+    const validAdjacentCells = adjacentCells.filter(
+      (cell) => !board.hitCells.includes(cell)
     );
 
+    // If no valid adjacent cells, fall back to generating a random coordinate
+    if (validAdjacentCells.length === 0) {
+      return this.generateCoordinate(board);
+    }
+
+    // Randomly select from the valid adjacent cells
     const randomIndex = Math.floor(Math.random() * validAdjacentCells.length);
     const nextAttack = validAdjacentCells[randomIndex];
-    console.log(nextAttack);
+
+    return nextAttack;
+  }
+
+  async computerAttack() {
+    if (this.turn !== 'computer') return; // Prevent computer from attacking out of turn
+
+    let result;
+    let coordinate;
+
+    if (this.nextCompAttack === undefined) {
+      coordinate = this.generateCoordinate(this.playerBoard);
+    } else {
+      coordinate = this.nextCompAttack;
+    }
+
+    result = this.receiveAttack(this.playerBoard, coordinate);
+
+    this.ui.updateUI(coordinate, result, true);
+
+    if (result === 'hit') {
+      this.prevCompHit.push(coordinate);
+      this.nextCompAttack = this.getNextAttack(coordinate, this.playerBoard);
+    } else {
+      this.nextCompAttack = undefined;
+    }
+
+    this.checkGameOver();
+    if (!this.gameOver) {
+      this.turn = 'player';
+    }
   }
 
   checkGameOver() {
