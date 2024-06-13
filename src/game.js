@@ -177,10 +177,10 @@ export class Game {
 
   getAdjacentCells(coordinate, board) {
     const directions = [
-      { row: 0, col: 1 }, // right
-      { row: 0, col: -1 }, // left
-      { row: 1, col: 0 }, // down
-      { row: -1, col: 0 }, // up
+      { row: 0, col: 1, name: 'right' }, // right
+      { row: 0, col: -1, name: 'left' }, // left
+      { row: 1, col: 0, name: 'down' }, // down
+      { row: -1, col: 0, name: 'up' }, // up
     ];
 
     const rows = 'ABCDEFGHIJ';
@@ -204,7 +204,10 @@ export class Game {
           coordinateMap.hasOwnProperty(newCoordinate) &&
           !board.hitCells.includes(newCoordinate)
         ) {
-          adjacentCells.push(newCoordinate);
+          adjacentCells.push({
+            coordinate: newCoordinate,
+            direction: direction.name,
+          });
         }
       }
     });
@@ -226,8 +229,10 @@ export class Game {
     }
 
     // Randomly select from the valid adjacent cells
+
     const randomIndex = Math.floor(Math.random() * validAdjacentCells.length);
-    const nextAttack = validAdjacentCells[randomIndex];
+    const nextCell = validAdjacentCells[randomIndex];
+    const nextAttack = nextCell.coordinate;
 
     return nextAttack;
   }
