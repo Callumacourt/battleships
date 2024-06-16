@@ -11,6 +11,7 @@ export class Game {
     this.computerWins = 0;
     this.gameOver = false;
     this.prevCompHit = [];
+    this.prevCompAttack = [];
     this.nextCompAttack = undefined;
 
     this.ui = new UI(this.computerBoard);
@@ -145,42 +146,12 @@ export class Game {
     return availableCells[randomIndex];
   }
 
-  async computerAttack() {
-    if (this.turn !== 'computer') return; // Prevent computer from attacking out of turn
-
-    let result;
-
-    const coordinate = this.generateCoordinate(this.playerBoard);
-
-    if (this.nextCompAttack === undefined) {
-      console.log('undefined');
-      result = this.receiveAttack(this.playerBoard, coordinate);
-    } else {
-      console.log('defined');
-    }
-
-    this.ui.updateUI(coordinate, result, true);
-
-    if (result === 'hit') {
-      this.prevCompHit.push(coordinate);
-      this.nextCompAttack = this.getNextAttack(coordinate, this.playerBoard);
-      console.log(this.nextCompAttack);
-
-      //if those hit, continue in that direction
-    }
-
-    this.checkGameOver();
-    if (!this.gameOver) {
-      this.turn = 'player';
-    }
-  }
-
   getAdjacentCells(coordinate, board) {
     const directions = [
-      { row: 0, col: 1 }, // right
-      { row: 0, col: -1 }, // left
-      { row: 1, col: 0 }, // down
-      { row: -1, col: 0 }, // up
+      { row: 0, col: 1, direction: 'right' }, // right
+      { row: 0, col: -1, direction: 'left' }, // left
+      { row: 1, col: 0, direction: 'down' }, // down
+      { row: -1, col: 0, direction: 'up' }, // up
     ];
 
     const rows = 'ABCDEFGHIJ';
@@ -196,6 +167,7 @@ export class Game {
     directions.forEach((direction) => {
       const newRow = rows[rows.indexOf(currentRow) + direction.row];
       const newCol = (parseInt(currentCol) + direction.col).toString();
+      const direc = direction.direction;
 
       if (newRow && cols.includes(newCol)) {
         const newCoordinate = newRow + newCol;
@@ -204,20 +176,23 @@ export class Game {
           coordinateMap.hasOwnProperty(newCoordinate) &&
           !board.hitCells.includes(newCoordinate)
         ) {
-          adjacentCells.push(newCoordinate);
+          adjacentCells.push({ coordinate: newCoordinate, direction: direc });
         }
       }
     });
-
+    console.log(adjacentCells);
     return adjacentCells;
   }
 
   getNextAttack(coordinate, board) {
+    console.log(this.prevCompAttack);
+    console.log(this.prevCompHit);
+
     const adjacentCells = this.getAdjacentCells(coordinate, board);
 
     // Filter out cells that have already been hit
     const validAdjacentCells = adjacentCells.filter(
-      (cell) => !board.hitCells.includes(cell)
+      (cell) => !board.hitCells.includes(cell.coordinate)
     );
 
     // If no valid adjacent cells, fall back to generating a random coordinate
@@ -228,8 +203,9 @@ export class Game {
     // Randomly select from the valid adjacent cells
     const randomIndex = Math.floor(Math.random() * validAdjacentCells.length);
     const nextAttack = validAdjacentCells[randomIndex];
+    this.prevCompHit.push(nextAttack);
 
-    return nextAttack;
+    return nextAttack.coordinate;
   }
 
   async computerAttack() {
@@ -238,10 +214,16 @@ export class Game {
     let result;
     let coordinate;
 
+    // Reset the arrays to have only one element
+    this.prevCompHit = [];
+    this.prevCompAttack = [];
+
     if (this.nextCompAttack === undefined) {
       coordinate = this.generateCoordinate(this.playerBoard);
+      this.prevCompAttack.push(coordinate);
     } else {
       coordinate = this.nextCompAttack;
+      this.prevCompAttack.push(coordinate);
     }
 
     result = this.receiveAttack(this.playerBoard, coordinate);
