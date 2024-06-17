@@ -13,6 +13,7 @@ export class Game {
     this.prevCompHit = [];
     this.prevCompAttack = [];
     this.nextCompAttack = undefined;
+    this.currentDirection = undefined;
 
     this.ui = new UI(this.computerBoard);
     this.placeShips();
@@ -49,7 +50,7 @@ export class Game {
         );
         this.ui.updateShipOnUI(coordinates, size, orientation);
       } catch (error) {
-        console.error(`Failed to place ship: ${error.message}`);
+        throw new Error(`Failed to place ship: ${error.message}`);
       }
     });
 
@@ -63,13 +64,13 @@ export class Game {
         );
         this.ui.updateShipOnUI(coordinates, size, orientation, true); // Pass `true` to indicate it's the player board
       } catch (error) {
-        console.error(`Failed to place ship: ${error.message}`);
+        throw new Error(`Failed to place ship: ${error.message}`);
       }
     });
   }
 
   playerReceiveAttack(coordinates) {
-    if (this.turn !== 'player' || this.gameOver === true) return; // Prevent player from attacking out of turn
+    if (this.turn !== 'player' || this.gameOver) return; // Prevent player from attacking out of turn
     const result = this.receiveAttack(this.computerBoard, coordinates);
     this.ui.updateUI(coordinates, result, false);
     this.checkGameOver();
@@ -92,8 +93,9 @@ export class Game {
       const result = this.handleHit(parentShip, board, coordinate, row, col);
       board.hitCells.push(coordinates);
 
-      if (result === 'sunk') {
+      if (parentShip.occupiedCells.length === 0) {
         this.handleSunk(parentShip, board);
+        return 'sunk';
       }
 
       return 'hit';
@@ -117,12 +119,8 @@ export class Game {
 
   handleHit(parentShip, board, coordinate, row, col) {
     parentShip.hit();
-
     board.board[row][col][2] = true; // Set the 'isHit' flag to true for a hit
     parentShip.removeOccupiedCell(coordinate);
-    if (parentShip.occupiedCells.length === 0) {
-      this.handleSunk(parentShip, board);
-    }
 
     return 'hit';
   }
@@ -130,6 +128,7 @@ export class Game {
   handleSunk(parentShip, board) {
     parentShip.occupiedCells.forEach((coordinate) => {
       parentShip.removeOccupiedCell(coordinate);
+      this.ui.updateUI(coordinate, 'sunk', board === this.playerBoard);
     });
 
     board.ships = board.ships.filter((ship) => ship !== parentShip);
@@ -180,30 +179,37 @@ export class Game {
         }
       }
     });
-    console.log(adjacentCells);
     return adjacentCells;
   }
 
   getNextAttack(coordinate, board) {
-    console.log(this.prevCompAttack);
-    console.log(this.prevCompHit);
+    if (this.prevCompHit.length > 0) {
+      const lastHit = this.prevCompHit[this.prevCompHit.length - 1];
+      const possibleCells = this.getAdjacentCells(
+        lastHit.coordinate,
+        board
+      ).filter((cell) => cell.direction === lastHit.direction);
+      if (possibleCells.length > 0) {
+        return possibleCells[Math.floor(Math.random() * possibleCells.length)]
+          .coordinate;
+      } else {
+        this.currentDirection = undefined;
+      }
+    }
 
     const adjacentCells = this.getAdjacentCells(coordinate, board);
-
-    // Filter out cells that have already been hit
     const validAdjacentCells = adjacentCells.filter(
       (cell) => !board.hitCells.includes(cell.coordinate)
     );
 
-    // If no valid adjacent cells, fall back to generating a random coordinate
     if (validAdjacentCells.length === 0) {
       return this.generateCoordinate(board);
     }
 
-    // Randomly select from the valid adjacent cells
-    const randomIndex = Math.floor(Math.random() * validAdjacentCells.length);
-    const nextAttack = validAdjacentCells[randomIndex];
+    const nextAttack =
+      validAdjacentCells[Math.floor(Math.random() * validAdjacentCells.length)];
     this.prevCompHit.push(nextAttack);
+    this.currentDirection = nextAttack.direction;
 
     return nextAttack.coordinate;
   }
@@ -213,10 +219,6 @@ export class Game {
 
     let result;
     let coordinate;
-
-    // Reset the arrays to have only one element
-    this.prevCompHit = [];
-    this.prevCompAttack = [];
 
     if (this.nextCompAttack === undefined) {
       coordinate = this.generateCoordinate(this.playerBoard);
@@ -231,10 +233,11 @@ export class Game {
     this.ui.updateUI(coordinate, result, true);
 
     if (result === 'hit') {
-      this.prevCompHit.push(coordinate);
+      this.prevCompHit.push({ coordinate, direction: this.currentDirection });
       this.nextCompAttack = this.getNextAttack(coordinate, this.playerBoard);
     } else {
       this.nextCompAttack = undefined;
+      this.currentDirection = undefined;
     }
 
     this.checkGameOver();

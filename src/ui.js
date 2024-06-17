@@ -83,8 +83,8 @@ export class UI {
         cell.textContent = 'x';
       } else if (result === 'sunk') {
         cell.classList.add('sunk');
-        cell.classList.add('hit');
-      } else {
+        cell.classList.remove('hit');
+      } else if (result === 'hit') {
         cell.classList.add('hit');
       }
     }
