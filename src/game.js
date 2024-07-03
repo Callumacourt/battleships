@@ -1,3 +1,5 @@
+// game.js
+
 import { handleAttackError } from './validate';
 import { gameboard } from './gameboard';
 import { UI } from './ui';
@@ -14,12 +16,18 @@ export class Game {
     this.prevCompAttack = [];
     this.nextCompAttack = undefined;
     this.currentDirection = undefined;
+    this.gameMode = 'initial';
 
     this.ui = new UI(this.computerBoard);
+    this.ui.gameState(this.startPlacementMode.bind(this));
+  }
+
+  startPlacementMode() {
+    this.gameMode = 'placement';
     this.placeShips();
     this.ui.bindEventListeners(
       this.turn === 'player',
-      this.playerReceiveAttack.bind(this) // Separate player attack handler
+      this.playerReceiveAttack.bind(this)
     );
   }
 

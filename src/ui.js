@@ -2,6 +2,7 @@ export class UI {
   constructor(gameboard) {
     this.gameboard = gameboard;
     this.createGameboard();
+    this.gameMode = 'initial'; // Initial game mode
   }
 
   createGameboard() {
@@ -28,6 +29,14 @@ export class UI {
         computerGridContainer.appendChild(computerCell);
       }
     }
+  }
+
+  gameState(startGameCallback) {
+    const gameStarter = document.querySelector('.startBtn');
+    gameStarter.addEventListener('click', () => {
+      this.gameMode = 'placement';
+      startGameCallback();
+    });
   }
 
   bindEventListeners(isPlayerTurn, receiveAttackFn) {
