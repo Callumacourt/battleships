@@ -3,6 +3,16 @@ export class UI {
     this.gameboard = gameboard;
     this.createGameboard();
     this.gameMode = 'initial'; // Initial game mode
+    this.currentShipIndex = 0; // Track the index of the current ship to be placed
+    this.shipsToPlacePlayer = [
+      { size: 5, orientation: 'X' },
+      { size: 4, orientation: 'X' },
+      { size: 3, orientation: 'X' },
+      { size: 3, orientation: 'X' },
+      { size: 2, orientation: 'X' },
+    ];
+    this.currentOrientation = 'X'; // Default orientation is horizontal
+    this.initOrientationButton();
   }
 
   createGameboard() {
@@ -31,6 +41,18 @@ export class UI {
     }
   }
 
+  initOrientationButton() {
+    const orientationButton = document.createElement('button');
+    orientationButton.classList.add('orientationButton');
+    orientationButton.textContent = 'Change Orientation';
+    document.body.appendChild(orientationButton);
+
+    orientationButton.addEventListener('click', () => {
+      this.currentOrientation = this.currentOrientation === 'X' ? 'Y' : 'X';
+      orientationButton.textContent = `Orientation: ${this.currentOrientation}`;
+    });
+  }
+
   gameState(startGameCallback) {
     const gameStarter = document.querySelector('.startBtn');
     gameStarter.addEventListener('click', () => {
@@ -46,7 +68,8 @@ export class UI {
         if (
           cell.classList.contains('hit') ||
           cell.classList.contains('missed') ||
-          !isPlayerTurn
+          !isPlayerTurn ||
+          this.gameMode !== 'play'
         ) {
           return;
         }
@@ -55,6 +78,44 @@ export class UI {
         cell.dataset.clicked = 'true';
       });
     });
+
+    const playerCells = document.querySelectorAll('.playerCell');
+    playerCells.forEach((cell) => {
+      cell.addEventListener('click', () => {
+        if (this.gameMode === 'placement') {
+          const coordinate = cell.dataset.coordinate;
+          const currentShip = this.shipsToPlacePlayer[this.currentShipIndex];
+          if (currentShip) {
+            const { size } = currentShip;
+            if (
+              this.placePlayerShip(coordinate, size, this.currentOrientation)
+            ) {
+              this.updateShipOnUI(
+                coordinate,
+                size,
+                this.currentOrientation,
+                true
+              );
+              this.currentShipIndex++;
+              if (this.currentShipIndex >= this.shipsToPlacePlayer.length) {
+                this.gameMode = 'play';
+                this.onShipsPlaced();
+              }
+            }
+          }
+        }
+      });
+    });
+  }
+
+  placePlayerShip(coordinate, size, orientation) {
+    try {
+      this.gameboard.placeShip(coordinate, size, orientation);
+      return true;
+    } catch (error) {
+      console.error(`Failed to place ship: ${error.message}`);
+      return false;
+    }
   }
 
   updateShipOnUI(coordinate, size, orientation, isPlayerBoard = false) {
@@ -105,5 +166,9 @@ export class UI {
     gameOverDiv.classList.add('gameOverContainer');
     gameOverDiv.innerHTML = 'Game over, ' + `${winner}` + ' wins';
     body.appendChild(gameOverDiv);
+  }
+
+  onShipsPlaced() {
+    // Callback to be set by the Game class to start the actual gameplay
   }
 }

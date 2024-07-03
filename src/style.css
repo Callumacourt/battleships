@@ -26,7 +26,7 @@ height: 100%;}
 
 
 .hit{
-background-color: black;
+background-color: orange !important
 }
 
 .sunk{background-color: red !important;}
@@ -50,3 +50,5 @@ align-items: center;}
     display: flex;
     justify-content: center;
 }
+
+.ship{background-color: black;}

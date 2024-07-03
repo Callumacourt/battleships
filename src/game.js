@@ -1,5 +1,3 @@
-// game.js
-
 import { handleAttackError } from './validate';
 import { gameboard } from './gameboard';
 import { UI } from './ui';
@@ -18,29 +16,22 @@ export class Game {
     this.currentDirection = undefined;
     this.gameMode = 'initial';
 
-    this.ui = new UI(this.computerBoard);
+    this.ui = new UI(this.playerBoard);
     this.ui.gameState(this.startPlacementMode.bind(this));
+    this.ui.onShipsPlaced = this.startGame.bind(this);
   }
 
   startPlacementMode() {
     this.gameMode = 'placement';
-    this.placeShips();
+    this.placeComputerShips();
     this.ui.bindEventListeners(
       this.turn === 'player',
       this.playerReceiveAttack.bind(this)
     );
   }
 
-  placeShips() {
+  placeComputerShips() {
     const shipsToPlaceComputer = [
-      { coordinates: 'A1', size: 5, orientation: 'X' },
-      { coordinates: 'B1', size: 4, orientation: 'X' },
-      { coordinates: 'C1', size: 3, orientation: 'X' },
-      { coordinates: 'D1', size: 3, orientation: 'X' },
-      { coordinates: 'E1', size: 2, orientation: 'X' },
-    ];
-
-    const shipsToPlacePlayer = [
       { coordinates: 'A1', size: 5, orientation: 'X' },
       { coordinates: 'B1', size: 4, orientation: 'X' },
       { coordinates: 'C1', size: 3, orientation: 'X' },
@@ -61,20 +52,14 @@ export class Game {
         throw new Error(`Failed to place ship: ${error.message}`);
       }
     });
+  }
 
-    shipsToPlacePlayer.forEach((ship) => {
-      const { coordinates, size, orientation } = ship;
-      try {
-        this.playerBoard.placeShip(
-          coordinates.toUpperCase(),
-          size,
-          orientation.toUpperCase()
-        );
-        this.ui.updateShipOnUI(coordinates, size, orientation, true); // Pass `true` to indicate it's the player board
-      } catch (error) {
-        throw new Error(`Failed to place ship: ${error.message}`);
-      }
-    });
+  startGame() {
+    this.gameMode = 'play';
+    this.ui.bindEventListeners(
+      this.turn === 'player',
+      this.playerReceiveAttack.bind(this)
+    );
   }
 
   playerReceiveAttack(coordinates) {
